@@ -1,0 +1,22 @@
+{# Layout for the article detail #}
+<header>
+    <h1>{{ title }}</h1>
+    {% if date %}
+        <span class="date">★ Posted on {{ date }}</span>
+    {% endif %}
+</header>
+<article>
+    {% if large_image_path %}
+        <div class="illustration" style="background-image: url('{{ large_image_path }}')"></div>
+    {% endif %}
+    <div class="content">
+        {{ content }}
+        {% if tags %}
+            <span class="tag-cloud">❋ Tags:
+                {% for tag in tags -%}
+                    <a href="{{ tag.link }}">{{ tag.name }}</a>
+                {% endfor %}
+            </span>
+        {% endif %}
+    </div>
+</article>

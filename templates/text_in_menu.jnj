@@ -1,0 +1,3 @@
+<h3>{{ header }}</h3>
+<div class="separator"></div>
+<p>{{ content }}</p>

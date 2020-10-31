@@ -1,0 +1,10 @@
+<h3>Tags</h3>
+<div class="separator"></div>
+<ul class="tag-cloud">
+    {% if tags %}
+        {% for tag in tags %}
+            <li><a href="{{ tag.link }} ">{{ tag.name }}</a></li>
+        {% endfor %}
+    {% endif %}
+</ul>
+<div class="clear"></div>

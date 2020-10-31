@@ -1,0 +1,97 @@
+from pathlib import Path
+from dataclasses import dataclass
+from typing import Tuple, Dict
+
+
+@dataclass
+class Config(object):
+    """Configuration of the application.
+
+    Attributes:
+        templates_path (Path): Path to the folder with templates.
+        default_layout_template (str): Default template file for websites.
+        default_page_template (str): Default template for the page.
+        default_article_template (str): Default template for the article.
+        maximal_tag_cloud_size (int): Maximal number of elements in tag cloud.
+        default_tag_cloud_template (str): Template to generate tag cloud.
+        default_menu_template (str): Template for the menu.
+        default_recent_posts (str): Template for the recent posts.
+        maximal_recent_posts (int): Maximal number of recent posts to show.
+        site_title (str): Name of sites (tag title in the tag head).
+        site_logo_text (str): Text for the site logo.
+        site_title_separator (str): Separator for specific page for the title
+            tag in tag head.
+        site_title_homepage (str): Particular site name for the homepage.
+            Applies only if name is not defined explicitly.
+        site_home_url (str): URL path to the homepage (preferably '/' or
+            'index.html').
+        site_file_suffix (str): Suffix for the files generation (typically
+            '.html' or '.htm').
+        pagination_prefix (str): Prefix for pagination suffix (applies only if
+            the pagination is not on homepage), typically '-' => results in
+            pagination url following logic: something-page-5.
+        pagination_suffix (str): Suffix for pagination, typically 'page-' =>
+            results in pagination url following logic: something-page-5.
+        pagination_max_item_per_page (int): Number of articles per page.
+        footer (str): Footer of the page.
+    """
+    # Path to the templates
+    templates_path: Path = Path(Path(__file__).parent, 'templates')
+
+    # Template for whole sites
+    default_layout_template: str = "layout.jnj"
+
+    # Template to article
+    default_article_template: str = "article.jnj"
+
+    # Template to page
+    default_page_template: str = "article.jnj"
+
+    # Template to article list
+    default_article_list_template: str = "article_list.jnj"
+
+    # Tag cloud configuration
+    maximal_tag_cloud_size: int = 5
+    default_tag_cloud_template: str = "tag_cloud.jnj"
+
+    # Menu configuration
+    default_menu_template: str = "menu.jnj"
+
+    # Recent posts configuration
+    default_recent_posts: str = "recent_posts.jnj"
+    maximal_recent_posts: int = 5
+
+    # Configuration of page title (tag title in head)
+    site_title: str = "Some blog"
+    site_logo_text: str = "SOME BLOG"
+    site_title_separator: str = " | "
+    site_title_homepage: str = "personal blog"
+
+    # URL to the homepage
+    site_home_url: str = 'index.html'  # typically '/'
+
+    # Suffix for the pages (files suffix)
+    site_file_suffix: str = ".html"
+
+    # Pagination configuration
+    pagination_prefix: str = "-"  # applies only if url_alias is not None
+    pagination_suffix: str = "page-"
+    pagination_max_item_per_page: int = 7
+
+    # Text in right menu
+    default_text_sections_in_right_menu_template: str = 'text_in_menu.jnj'
+    text_sections_in_right_menu: Tuple[Dict[str, str]] = (
+        {
+            "header": "About",
+            "content": "Generated using Crinita"
+        },
+    )
+
+    # Default footer of page
+    footer: str = '<p><a rel="license" href="http://creativecommons.org/' \
+                  'licenses/by/4.0/"><img alt="Creative Commons License" ' \
+                  'style="border-width:0" src="https://i.creativecommons.org' \
+                  '/l/by/4.0/88x31.png" /></a><br />All the content is ' \
+                  'licensed under a <br><a rel="license" href="http://creat' \
+                  'ivecommons.org/licenses/by/4.0/">Creative Commons Attr' \
+                  'ibution 4.0 International License</a>.</p>'

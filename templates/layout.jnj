@@ -1,0 +1,40 @@
+{# Basic page layout #}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <meta name="description" content="{{ meta_description }}">
+    <meta name="keywords" content="{{ meta_keywords }}">
+    <meta name="author" content="{{ meta_author }}">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="container">
+        <nav>
+            <a href="{{ homepage_link }}" id="logo">
+                <span id="icon">&nbsp;</span>
+                {{ site_logo_text }}
+            </a>
+            {{ menu }}
+        </nav>
+        <section>
+            <main>
+                <div id="page-content">
+                    {{ page_content }}
+                </div>
+
+                <aside>
+                    {{ recent_posts }}
+                    {{ tag_cloud }}
+                    {{ text_section_in_right_menu }}
+                </aside>
+                <div class="clear"></div>
+            </main>
+            <footer>
+                {{ footer }}
+            </footer>
+        </section>
+    </div>
+</body>
+</html>

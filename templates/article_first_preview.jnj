@@ -1,0 +1,19 @@
+{# First article in the list of articles #}
+<header>
+    <a href="{{ url }}">{{ title }}</a>
+    {% if date %}
+        <span class="date">★ Posted on {{ date }}</span>
+    {% endif %}
+</header>
+<article>
+    {% if large_image_path %}
+        <div class="illustration" style="background-image: url('{{ large_image_path }}')"></div>
+    {% endif %}
+    <div class="content">
+        {{ lead }}
+        <div class="readmore">
+            <a href="{{ url }}">Read more</a>
+        </div>
+    </div>
+</article>
+<div class="separator"></div>
