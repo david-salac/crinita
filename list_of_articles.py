@@ -6,6 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 from .entity import Entity
 from .config import Config
 from .article import Tag, Article
+from .utils import Utils
 
 
 class ListOfArticles(Entity):
@@ -117,21 +118,14 @@ class ListOfArticles(Entity):
         """
         link_newer: str = None
         if page_position > 0:
-            link_newer = self.url_list[page_position - 1]
-            if link_newer is None:
-                link_newer = ""
-            # Add suffix to the file link
-            link_newer += Config.site_file_suffix
-            if page_position == 1 and self.url_list[page_position - 1] is None:
-                # Link to hompeage:
-                link_newer = Config.site_home_url
+            link_newer = Utils.generate_file_path(
+                self.url_list[page_position - 1]
+            )
         link_older: str = None
         if page_position < (len(self.url_list) - 1):
-            link_older = self.url_list[page_position + 1]
-            if link_older is None:
-                link_older = ""
-            # Add suffix to the file link
-            link_older += Config.site_file_suffix
+            link_older = Utils.generate_file_path(
+                self.url_list[page_position + 1]
+            )
         return {
             'navigation_previous': link_older,
             'navigation_next': link_newer

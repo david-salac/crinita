@@ -23,6 +23,8 @@ class Config(object):
             tag in tag head.
         site_title_homepage (str): Particular site name for the homepage.
             Applies only if name is not defined explicitly.
+        site_home_file_name (str): Name of the file that is meant to be
+            a homepage (typically 'index.html' or 'index.htm', but NEVER '/')
         site_home_url (str): URL path to the homepage (preferably '/' or
             'index.html').
         site_file_suffix (str): Suffix for the files generation (typically
@@ -69,6 +71,9 @@ class Config(object):
 
     # URL to the homepage
     site_home_url: str = 'index.html'  # typically '/'
+
+    # File that contains homepage
+    site_home_file_name: str = "index.html"
 
     # Suffix for the pages (files suffix)
     site_file_suffix: str = ".html"

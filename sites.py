@@ -1,14 +1,14 @@
-from typing import List, Dict, TYPE_CHECKING, Set
+from typing import List, Dict, Set
 from pathlib import Path
 from collections import defaultdict
 
 from jinja2 import Environment, FileSystemLoader
 
 from .config import Config
-
-if TYPE_CHECKING:
-    from .article import Article, Tag
-    from .page import Page
+from .utils import Utils
+from .article import Article, Tag
+from .page import Page
+from .list_of_articles import ListOfArticles
 
 
 class Sites(object):
@@ -173,10 +173,52 @@ class Sites(object):
                 right_menu_text += template.render(**item)
             return right_menu_text
 
-    def generate_page(
+    def _generate_tag_pagination_pages(
         self,
-        output_directory_path: Path
+        tag: Tag,
+        output_directory_path: Path,
+        rewrite_if_exists: bool
     ):
+        """Generate all files related to the concrete tag in the system.
+
+        Args:
+            tag (Tag): Tag for that content is generated.
+            output_directory_path (Path): Path where the output files are
+                generated.
+            rewrite_if_exists (bool): If True, files are rewritten; if False,
+                exception is raised.
+        """
+        list_page: ListOfArticles = ListOfArticles(
+            list_of_articles=self.tag_to_articles[tag],
+            url_alias=tag.url,
+            tag=tag
+        )
+        for single_url in list_page.url_list:
+            # TODO: Must be changed
+            target_file: Path = Path(
+                output_directory_path, Utils.generate_file_path(single_url)
+            )
+            if not rewrite_if_exists and not target_file.exists():
+                # Skip if existing files must not be rewritten.
+                raise FileExistsError("this file already exists")
+            with target_file.open('w') as file_handle:
+                file_handle.write(
+                    list_page.generate_page(single_url)
+                )
+
+    def generate_pages(
+        self,
+        output_directory_path: Path,
+        *,
+        rewrite_if_exists: bool = True
+    ) -> None:
+        """
+        Args:
+            output_directory_path (Path): Path to the directory where outputs
+                are generated.
+            rewrite_if_exists (bool): If True, files are rewritten; if False,
+                exception is raised.
+        """
         # TODO
         pass
 

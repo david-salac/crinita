@@ -2,6 +2,7 @@ from typing import Optional, List
 import abc
 
 from .config import Config
+from .utils import Utils
 
 
 class Entity(abc.ABC):
@@ -82,7 +83,4 @@ class Entity(abc.ABC):
     @property
     def url(self):
         """Generate the URL leading to the file (with file suffix)"""
-        if self.url_alias is None:
-            # Return URL to homepage
-            return Config.site_home_url
-        return self.url_alias + Config.site_file_suffix
+        return Utils.generate_file_path(self.url_alias)

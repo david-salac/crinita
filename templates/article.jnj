@@ -14,7 +14,7 @@
         {% if tags %}
             <span class="tag-cloud">❋ Tags:
                 {% for tag in tags -%}
-                    <a href="{{ tag.link }}">{{ tag.name }}</a>
+                    <a href="{{ tag.url }}">{{ tag.name }}</a>
                 {% endfor %}
             </span>
         {% endif %}

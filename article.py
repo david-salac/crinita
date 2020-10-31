@@ -6,20 +6,27 @@ from jinja2 import Environment, FileSystemLoader
 
 from .entity import Entity
 from .config import Config
+from .utils import Utils
 
 
 @dataclass
 class Tag(object):
+    """Represents single tag in the system.
+
+    Attributes:
+        name (str): Name of the tag (e. g. Big Data)
+        url_alias (str): Alias to the name (e. g. big-data)
+    """
     name: str
-    url: str
+    url_alias: str
 
     @property
-    def link(self) -> str:
+    def url(self) -> str:
         """Link for the page defining tag"""
-        return self.url + Config.site_file_suffix
+        return Utils.generate_file_path(self.url_alias)
 
     def __hash__(self):
-        return self.url.__hash__()
+        return self.url_alias.__hash__()
 
 
 class Article(Entity):

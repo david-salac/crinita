@@ -3,7 +3,7 @@
 <ul class="tag-cloud">
     {% if tags %}
         {% for tag in tags %}
-            <li><a href="{{ tag.link }} ">{{ tag.name }}</a></li>
+            <li><a href="{{ tag.url }} ">{{ tag.name }}</a></li>
         {% endfor %}
     {% endif %}
 </ul>
