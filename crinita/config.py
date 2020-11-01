@@ -47,6 +47,7 @@ class Config(object):
         time_format (str): Time format to be used for the datetime.strftime
             function call.
         site_map_template (str): Path to the site-map template.
+        robots_txt (str): Content of the robots.txt file
     """
     # Path to the templates
     templates_path: Path = Path(Path(__file__).parent, 'templates')
@@ -102,7 +103,7 @@ class Config(object):
     text_sections_in_right_menu: Tuple[Dict[str, str]] = (
         {
             "header": "About",
-            "content": 'Generated using <a href="http://www.crinita.com/">Crinita</a>.'
+            "content": 'Generated using <a href="http://www.crinita.com/">Crinita</a>.'  # noqa: E501
         },
     )
 
@@ -134,3 +135,8 @@ class Config(object):
 
     # Site map template
     site_map_template: str = 'site_map.jnj'
+
+    # Robots.txt content
+    robots_txt: str = """User-agent: *
+Allow: /
+Sitemap: sitemap.xml"""

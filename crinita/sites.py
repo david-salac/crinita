@@ -433,6 +433,11 @@ class Sites(object):
                 sitemap_def: str = template.render(urls=self.site_map_urls)
                 site_map_handler.write(sitemap_def)
 
+        # Write robots.txt
+        with output_directory_path.joinpath(
+                'robots.txt').open('w') as robots_txt:
+            robots_txt.write(Config.robots_txt)
+
     @property
     def list_of_articles(self):  # Ordered by date
         return self._list_of_articles
