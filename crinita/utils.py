@@ -9,5 +9,5 @@ class Utils(object):
         """Generate the file name to the link on the page.
         """
         if url_root is None:
-            return Config.site_home_file_name
+            return Config.site_home_url
         return url_root + Config.site_file_suffix
