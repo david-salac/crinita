@@ -2,6 +2,7 @@ from typing import List, Dict, Set, Optional, Union
 from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass
+from functools import lru_cache
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -173,6 +174,7 @@ class Sites(object):
             if len(all_urls) != number_of_elements:
                 raise ValueError("Not all URLs are unique!")
 
+    @lru_cache()
     def generate_tag_cloud(self) -> str:
         """Generate the tag cloud.
 
@@ -193,6 +195,7 @@ class Sites(object):
             )
             return html_str
 
+    @lru_cache()
     def generate_menu(self) -> str:
         """Generate the menu.
 
@@ -202,16 +205,37 @@ class Sites(object):
         template = self.menu_template
         if template == "__DEFAULT__":
             template = Config.default_menu_template
+
+        # Load external menu items
+        @dataclass()
+        class _MenuItem(object):
+            url: str
+            title: str
+            menu_position: int
+        external_items = []  # External menu items
+        for external_item in Config.append_to_menu:
+            item = _MenuItem(external_item['url'],
+                             external_item['title'],
+                             external_item['menu_position'])
+            if item.url == "__HOME_PAGE__":
+                item.url = Config.site_home_url
+            external_items.append(item)
+        all_items_in_menu: list = self.list_of_pages_in_menu + external_items
+
+        # Sort all items by the position inside the menu
+        all_items_in_menu.sort(key=lambda x: x.menu_position)
+
         # Generate HTML code
         with open(Config.templates_path.joinpath(template)) as tem_han:
             template = Environment(
                 loader=FileSystemLoader(Config.templates_path)
             ).from_string(tem_han.read())
             html_str = template.render(
-                menu_items=self.list_of_pages_in_menu
+                menu_items=all_items_in_menu
             )
             return html_str
 
+    @lru_cache()
     def generate_recent_posts(self) -> str:
         """Generate the recent posts tag.
 
@@ -233,6 +257,7 @@ class Sites(object):
             )
             return html_str
 
+    @lru_cache()
     def generate_text_sections_in_right_menu(self) -> str:
         """Generate the text sections in right menu.
 
@@ -394,6 +419,7 @@ class Sites(object):
         return self._list_of_pages
 
     @property
+    @lru_cache()
     def list_of_pages_in_menu(self):  # Ordered by date
         for i in range(len(self._list_of_pages)):
             if self._list_of_pages[i].menu_position is not None:
@@ -413,6 +439,7 @@ class Sites(object):
         return self._tag_to_articles
 
     @property
+    @lru_cache()
     def homepage(self) -> Entity:
         """Get the homepage of the sites. Technically the Entity that has
             url_alias set to None. If there is not any Entity, the new one

@@ -39,6 +39,11 @@ class Config(object):
         footer (str): Footer of the page.
         append_to_head_tag (str): Text that is appended to the header tag
             in the HTML page (before the style is imported).
+        append_to_menu (Tuple[Dict[str, str]]): Tuple of items that are added
+            to the menu. Contains dictionaries with keys: 'title' which is the
+            name of the item, 'url' which is the link (__HOME_PAGE__ if the
+            homepage is meant to be the target), 'menu_position' which is the
+            position inside menu.
     """
     # Path to the templates
     templates_path: Path = Path(Path(__file__).parent, 'templates')
@@ -106,3 +111,17 @@ class Config(object):
     default_meta_description = "Some blog"
     default_meta_keywords = "blog, posts"
     default_meta_meta_author = "Crinita"
+
+    # Menu configuration
+    append_to_menu: Tuple[Dict[str, str]] = (
+        {
+            "title": "HOME",
+            "url": "__HOME_PAGE__",  # Either __HOME_PAGE__ or external link
+            "menu_position": 0
+        },
+        {
+            "title": "Smth external",
+            "url": "http://github.com",
+            "menu_position": 21
+        },
+    )
