@@ -1,4 +1,4 @@
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional, Union
 from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass
@@ -8,6 +8,7 @@ from jinja2 import Environment, FileSystemLoader
 from .config import Config
 from .utils import Utils
 from .article import Article, Tag
+from .entity import Entity
 from .page import Page
 from .list_of_articles import ListOfArticles
 
@@ -251,12 +252,51 @@ class Sites(object):
                 right_menu_text += template.render(**item)
             return right_menu_text
 
-    def _generate_tag_pagination_pages(
+    def _generate_article_or_page(
+        self,
+        article_or_page: Union[Article, Page],
+        output_directory_path: Path,
+        rewrite_if_exists: bool
+    ) -> None:
+        """Generate HTML code and save it to the file for an article or page.
+
+        Args:
+            output_directory_path (Path): Path where the output files are
+                generated.
+            rewrite_if_exists (bool): If True, files are rewritten; if False,
+                exception is raised.
+        """
+        target_file: Path = Path(
+            output_directory_path, Utils.generate_file_path(
+                article_or_page.url_alias
+            )
+        )
+        if not rewrite_if_exists and target_file.exists():
+            # Skip if existing files must not be rewritten.
+            raise FileExistsError("this file already exists")
+        # Write content to file
+        _SinglePageHTML(
+            page_content=article_or_page.generate_page(
+                article_or_page.url_alias
+            ),
+            title=article_or_page.page_title,
+
+            # Generate blocks
+            meta_description=article_or_page.description,
+            meta_keywords=article_or_page.keywords,
+            menu=self.generate_menu(),
+            recent_posts=self.generate_recent_posts(),
+            tag_cloud=self.generate_tag_cloud(),
+            text_section_in_right_menu=self.generate_text_sections_in_right_menu()  # noqa: E501
+        ).write_to_file(target_file, self.layout_template)
+
+    def _generate_list_of_articles_with_pagination(
         self,
         tag: Tag,
         output_directory_path: Path,
-        rewrite_if_exists: bool
-    ):
+        rewrite_if_exists: bool, *,
+        list_page: Optional[ListOfArticles] = None
+    ) -> None:
         """Generate all files related to the concrete tag in the system.
 
         Args:
@@ -265,13 +305,15 @@ class Sites(object):
                 generated.
             rewrite_if_exists (bool): If True, files are rewritten; if False,
                 exception is raised.
+            list_page (Optional[ListOfArticles]): Entity that is used for
+                pagination (if None, new entity is created from the tag).
         """
-        list_page: ListOfArticles = ListOfArticles(
-            list_of_articles=self.tag_to_articles[tag],
-            url_alias=tag.url_alias,
-            tag=tag
-        )
-        print(list_page.url_list)
+        if list_page is None:
+            list_page: ListOfArticles = ListOfArticles(
+                list_of_articles=self.tag_to_articles[tag],
+                url_alias=tag.url_alias,
+                tag=tag
+            )
         for single_url in list_page.url_list:
             target_file: Path = Path(
                 output_directory_path, Utils.generate_file_path(single_url)
@@ -306,8 +348,42 @@ class Sites(object):
             rewrite_if_exists (bool): If True, files are rewritten; if False,
                 exception is raised.
         """
-        # TODO
-        pass
+        # Generate all articles
+        if isinstance(self.homepage, (Article, Page)):
+            self._generate_article_or_page(
+                article_or_page=self.homepage,
+                output_directory_path=output_directory_path,
+                rewrite_if_exists=rewrite_if_exists
+            )
+        for article in self.list_of_articles:
+            self._generate_article_or_page(
+                article_or_page=article,
+                output_directory_path=output_directory_path,
+                rewrite_if_exists=rewrite_if_exists
+            )
+
+        # Generate all pagination of articles
+        if isinstance(self.homepage, ListOfArticles):
+            self._generate_list_of_articles_with_pagination(
+                tag=None,
+                output_directory_path=output_directory_path,
+                rewrite_if_exists=rewrite_if_exists,
+                list_page=self.homepage
+            )
+        for tag in self.list_of_tags:
+            self._generate_list_of_articles_with_pagination(
+                tag=tag,
+                output_directory_path=output_directory_path,
+                rewrite_if_exists=rewrite_if_exists,
+            )
+
+        # Generate all pages
+        for page in self.list_of_pages:
+            self._generate_article_or_page(
+                article_or_page=page,
+                output_directory_path=output_directory_path,
+                rewrite_if_exists=rewrite_if_exists
+            )
 
     @property
     def list_of_articles(self):  # Ordered by date
@@ -335,3 +411,30 @@ class Sites(object):
     @property
     def tag_to_articles(self):  # Ordered by date
         return self._tag_to_articles
+
+    @property
+    def homepage(self) -> Entity:
+        """Get the homepage of the sites. Technically the Entity that has
+            url_alias set to None. If there is not any Entity, the new one
+            is created as a list of all articles in the system.
+        """
+        # Run through all pages:
+        homepage_ent: Entity = None
+        for page in self.list_of_pages:
+            if page.url_alias is None:
+                if homepage_ent is not None:
+                    raise ValueError("there are (at least) two homepages")
+                homepage_ent = page
+
+        # Run through all articles:
+        for article in self.list_of_articles:
+            if article.url_alias is None:
+                if homepage_ent is not None:
+                    raise ValueError("there are (at least) two homepages")
+                homepage_ent = article
+
+        # If there is no explicit homepage, generate as a list of all articles
+        if homepage_ent is None:
+            homepage_ent = ListOfArticles(self.list_of_articles)
+
+        return homepage_ent
