@@ -101,7 +101,7 @@ class Config(object):
     text_sections_in_right_menu: Tuple[Dict[str, str]] = (
         {
             "header": "About",
-            "content": "Generated using Crinita"
+            "content": 'Generated using <a href="http://www.crinita.com/">Crinita</a>.'
         },
     )
 
