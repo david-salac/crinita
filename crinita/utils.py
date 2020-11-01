@@ -1,5 +1,6 @@
 from typing import Optional
-from config import Config
+
+from .config import Config
 
 
 class Utils(object):
