@@ -44,6 +44,8 @@ class Config(object):
             name of the item, 'url' which is the link (__HOME_PAGE__ if the
             homepage is meant to be the target), 'menu_position' which is the
             position inside menu.
+        time_format (str): Time format to be used for the datetime.strftime
+            function call.
     """
     # Path to the templates
     templates_path: Path = Path(Path(__file__).parent, 'templates')
@@ -125,3 +127,6 @@ class Config(object):
             "menu_position": 21
         },
     )
+
+    # Time format for datetime.datetime.strftime transformation
+    time_format: str = "%B %d, %Y"

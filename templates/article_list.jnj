@@ -2,7 +2,7 @@
 {% if first_preview %}
     {% set url = first_preview.url %}
     {% set title = first_preview.title %}
-    {% set date = first_preview.date %}
+    {% set date = first_preview['date'] %}
     {% set large_image_path = first_preview.large_image_path %}
     {% set lead = first_preview.lead %}
     {% include "article_first_preview.jnj" %}
@@ -12,7 +12,7 @@
     {% for article_preview in article_previews %}
         {% set url = article_preview.url %}
         {% set title = article_preview.title %}
-        {% set date = article_preview.date %}
+        {% set date = article_preview['date'] %}
         {% set small_image_path = article_preview.small_image_path %}
         {% set lead = article_preview.lead %}
         {% include "article_preview.jnj" %}

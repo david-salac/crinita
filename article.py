@@ -100,6 +100,8 @@ class Article(Entity):
     def __getitem__(self, key):
         """Allows conversion of this class to dictionary.
         """
+        if key == 'date':
+            return self.date.strftime(Config.time_format)
         return getattr(self, key)
 
     def generate_page(self, url: str) -> str:
