@@ -15,7 +15,9 @@ class Utils(object):
         """
         if url_root is None:
             if to_html_file:
-                return Config.site_home_url
-            else:
                 return Config.site_home_file_name
+            else:
+                return Config.site_home_url
+
+
         return url_root + Config.site_file_suffix
