@@ -100,6 +100,7 @@ class Sites(object):
         tag_cloud_template (str): Template file for the tag cloud.
         menu_template (str): Template file for the menu.
         recent_posts_template (str): Template file for the recent posts.
+        site_map_urls (List[str]): List of all URLs in the app
     """
 
     def __init__(
@@ -173,6 +174,8 @@ class Sites(object):
             # Proceed the sanity check:
             if len(all_urls) != number_of_elements:
                 raise ValueError("Not all URLs are unique!")
+
+        self.site_map_urls: List[str] = []
 
     @lru_cache()
     def generate_tag_cloud(self) -> str:
@@ -315,6 +318,9 @@ class Sites(object):
             text_section_in_right_menu=self.generate_text_sections_in_right_menu()  # noqa: E501
         ).write_to_file(target_file, self.layout_template)
 
+        # Append to site map
+        self.site_map_urls.append(article_or_page.url)
+
     def _generate_list_of_articles_with_pagination(
         self,
         tag: Tag,
@@ -360,6 +366,9 @@ class Sites(object):
                 tag_cloud=self.generate_tag_cloud(),
                 text_section_in_right_menu=self.generate_text_sections_in_right_menu()  # noqa: E501
             ).write_to_file(target_file, self.layout_template)
+
+            # Append to site map
+            self.site_map_urls.append(Utils.generate_file_path(single_url))
 
     def generate_pages(
         self,
@@ -410,6 +419,19 @@ class Sites(object):
                 output_directory_path=output_directory_path,
                 rewrite_if_exists=rewrite_if_exists
             )
+
+        # Write site map file
+        with output_directory_path.joinpath(
+                'sitemap.xml').open('w') as site_map_handler:
+            with Config.templates_path.joinpath(
+                Config.site_map_template
+            ).open('r') as sitemap_template:
+                template = Environment(
+                    loader=FileSystemLoader(Config.templates_path)
+                ).from_string(sitemap_template.read())
+
+                sitemap_def: str = template.render(urls=self.site_map_urls)
+                site_map_handler.write(sitemap_def)
 
     @property
     def list_of_articles(self):  # Ordered by date

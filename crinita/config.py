@@ -46,6 +46,7 @@ class Config(object):
             position inside menu.
         time_format (str): Time format to be used for the datetime.strftime
             function call.
+        site_map_template (str): Path to the site-map template.
     """
     # Path to the templates
     templates_path: Path = Path(Path(__file__).parent, 'templates')
@@ -130,3 +131,6 @@ class Config(object):
 
     # Time format for datetime.datetime.strftime transformation
     time_format: str = "%B %d, %Y"
+
+    # Site map template
+    site_map_template: str = 'site_map.jnj'
