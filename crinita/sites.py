@@ -293,7 +293,7 @@ class Sites(object):
         """
         target_file: Path = Path(
             output_directory_path, Utils.generate_file_path(
-                article_or_page.url_alias
+                article_or_page.url_alias, True
             )
         )
         if not rewrite_if_exists and target_file.exists():
@@ -341,7 +341,8 @@ class Sites(object):
             )
         for single_url in list_page.url_list:
             target_file: Path = Path(
-                output_directory_path, Utils.generate_file_path(single_url)
+                output_directory_path, Utils.generate_file_path(single_url,
+                                                                True)
             )
             if not rewrite_if_exists and target_file.exists():
                 # Skip if existing files must not be rewritten.
