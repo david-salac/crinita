@@ -1,5 +1,5 @@
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Tuple, Dict
 
 
@@ -9,6 +9,7 @@ class Config(object):
 
     Attributes:
         templates_path (Path): Path to the folder with templates.
+        default_css_style_path (Path): Path to css styles
         default_layout_template (str): Default template file for websites.
         default_page_template (str): Default template for the page.
         default_article_template (str): Default template for the article.
@@ -36,9 +37,14 @@ class Config(object):
             results in pagination url following logic: something-page-5.
         pagination_max_item_per_page (int): Number of articles per page.
         footer (str): Footer of the page.
+        append_to_head_tag (str): Text that is appended to the header tag
+            in the HTML page (before the style is imported).
     """
     # Path to the templates
     templates_path: Path = Path(Path(__file__).parent, 'templates')
+
+    # Path to CSS styles
+    default_css_style_path: Path = Path('style.css')
 
     # Template for whole sites
     default_layout_template: str = "layout.jnj"
@@ -93,10 +99,10 @@ class Config(object):
     )
 
     # Default footer of page
-    footer: str = '<p><a rel="license" href="http://creativecommons.org/' \
-                  'licenses/by/4.0/"><img alt="Creative Commons License" ' \
-                  'style="border-width:0" src="https://i.creativecommons.org' \
-                  '/l/by/4.0/88x31.png" /></a><br />All the content is ' \
-                  'licensed under a <br><a rel="license" href="http://creat' \
-                  'ivecommons.org/licenses/by/4.0/">Creative Commons Attr' \
-                  'ibution 4.0 International License</a>.</p>'
+    footer: str = '<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />All the content is licensed under a <br><a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>'  # noqa: E501
+    append_to_head_tag: str = '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">'  # noqa: E501
+
+    # Default meta tags values
+    default_meta_description = "Some blog"
+    default_meta_keywords = "blog, posts"
+    default_meta_meta_author = "Crinita"

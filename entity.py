@@ -58,7 +58,8 @@ class Entity(abc.ABC):
         """
         raise NotImplementedError
 
-    def generate_page_title(self) -> str:
+    @property
+    def page_title(self) -> str:
         """Generate the page title in the logic:
             SITE_NAME + SEPARATOR + TITLE
 

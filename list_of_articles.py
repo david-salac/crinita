@@ -132,13 +132,11 @@ class ListOfArticles(Entity):
         }
 
     def generate_page(self, url: str) -> str:
-        with open(Config.templates_path.joinpath(self.template)) as tem_han:
+        with Config.templates_path.joinpath(self.template).open() as tem_han:
             template = Environment(
                 loader=FileSystemLoader(Config.templates_path)
             ).from_string(tem_han.read())
-            print(self._generate_content(
-                    self.url_list.index(url)
-                ))
+            # Page position in pagination (indexed from 0)
             page_position: int = self.url_list.index(url)
             html_str = template.render(
                 {

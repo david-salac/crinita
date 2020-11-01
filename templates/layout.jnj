@@ -6,8 +6,8 @@
     <meta name="description" content="{{ meta_description }}">
     <meta name="keywords" content="{{ meta_keywords }}">
     <meta name="author" content="{{ meta_author }}">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    {{ append_to_head_tag }}
+    <link rel="stylesheet" href="{{ css_style_file }}">
 </head>
 <body>
     <div id="container">

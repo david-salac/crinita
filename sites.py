@@ -1,6 +1,7 @@
 from typing import List, Dict, Set
 from pathlib import Path
 from collections import defaultdict
+from dataclasses import dataclass
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -9,6 +10,78 @@ from .utils import Utils
 from .article import Article, Tag
 from .page import Page
 from .list_of_articles import ListOfArticles
+
+
+@dataclass()
+class _SinglePageHTML(object):
+    """Dataclass for generation of the HTML page from layout.
+    """
+    title: str
+    menu: str
+    page_content: str
+    recent_posts: str
+    tag_cloud: str
+    text_section_in_right_menu: str
+    meta_description: str = None
+    meta_keywords: str = None
+    meta_author: str = None
+    css_style_file: str = None
+    append_to_head_tag: str = None
+    homepage_link: str = None
+    site_logo_text: str = None
+    footer: str = None
+
+    def keys(self) -> List[str]:
+        """Get keys that allows conversion of this class to dictionary.
+
+        Returns:
+            List[str]: List of the keys to be passed to template.
+        """
+        return [atr for atr in vars(self) if '__' not in atr]
+
+    def __getitem__(self, key):
+        """Allows conversion of this class to dictionary.
+        """
+        return getattr(self, key)
+
+    def write_to_file(
+        self,
+        file_path: Path,
+        layout_template_path: Path
+    ) -> None:
+        """Write page content to the HTML file.
+
+        Args:
+            file_path (Path): Path to the file
+            layout_template_path (Path): Path to the layout template
+        """
+        if self.meta_description is None:
+            self.meta_description = Config.default_meta_description
+        if self.meta_keywords is None:
+            self.meta_keywords = Config.default_meta_keywords
+        if self.meta_author is None:
+            self.meta_author = Config.default_meta_meta_author
+        if self.append_to_head_tag is None:
+            self.append_to_head_tag = Config.append_to_head_tag
+        if self.footer is None:
+            self.footer = Config.footer
+        if self.css_style_file is None:
+            self.css_style_file = str(Config.default_css_style_path)
+        if self.site_logo_text is None:
+            self.site_logo_text = Config.site_logo_text
+        if self.homepage_link is None:
+            self.homepage_link = Config.site_home_url
+
+        with Config.templates_path.joinpath(
+            layout_template_path
+        ).open('r') as html_template:
+            template = Environment(
+                loader=FileSystemLoader(Config.templates_path)
+            ).from_string(html_template.read())
+
+            html_str = template.render(**dict(self))
+            with file_path.open('w') as writer_to_html:
+                writer_to_html.write(html_str)
 
 
 class Sites(object):
@@ -29,9 +102,10 @@ class Sites(object):
 
     def __init__(
         self,
-        list_of_articles: List['Article'],
-        list_of_pages: List['Page'], *,
+        list_of_articles: List[Article],
+        list_of_pages: List[Page], *,
         check_url_unique: bool = True,
+        layout_template: str = "__DEFAULT__",
         tag_cloud_template: str = "__DEFAULT__",
         menu_template: str = "__DEFAULT__",
         recent_posts_template: str = "__DEFAULT__",
@@ -44,6 +118,7 @@ class Sites(object):
              list_of_articles (List['Article']): List of all articles to be
                 included.
              check_url_unique (bool): If True, uniqueness of URLs is checked.
+             layout_template (str): Template file for the whole sites.
              tag_cloud_template (str): Template file for the tag cloud.
              menu_template (str): Template file for the menu.
              recent_posts_template (str): Template file for the recent posts.
@@ -53,18 +128,21 @@ class Sites(object):
         self.tag_cloud_template: str = tag_cloud_template
         self.menu_template: str = menu_template
         self.recent_posts_template: str = recent_posts_template
-        self.text_sections_in_right_menu_template = \
+        self.text_sections_in_right_menu_template: str = \
             text_sections_in_right_menu_template
+        self.sites_template: str = layout_template
+        if layout_template == "__DEFAULT__":
+            self.layout_template = Config.default_layout_template
 
         if check_url_unique:
             # For sanity check (uniqueness of URLs)
             all_urls: Set[str] = set([])
             number_of_elements: int = 0
         # Process articles
-        self._list_of_articles: List['Article'] = sorted(list_of_articles,
-                                                         key=lambda x: x.date)
-        self._tag_to_articles: Dict['Tag', List['Article']] = defaultdict(list)
-        self._tag_to_incidence: Dict['Tag', int] = defaultdict(int)
+        self._list_of_articles: List[Article] = sorted(list_of_articles,
+                                                       key=lambda x: x.date)
+        self._tag_to_articles: Dict[Tag, List[Article]] = defaultdict(list)
+        self._tag_to_incidence: Dict[Tag, int] = defaultdict(int)
         for article in list_of_articles:
             if check_url_unique:
                 # Add url to set (for sanity check)
@@ -81,7 +159,7 @@ class Sites(object):
                                     reverse=True)
         }
         # Process pages
-        self._list_of_pages: List['Page'] = sorted(
+        self._list_of_pages: List[Page] = sorted(
             list_of_pages,
             key=lambda x: x.menu_position if x.menu_position else -1
         )
@@ -190,21 +268,30 @@ class Sites(object):
         """
         list_page: ListOfArticles = ListOfArticles(
             list_of_articles=self.tag_to_articles[tag],
-            url_alias=tag.url,
+            url_alias=tag.url_alias,
             tag=tag
         )
+        print(list_page.url_list)
         for single_url in list_page.url_list:
-            # TODO: Must be changed
             target_file: Path = Path(
                 output_directory_path, Utils.generate_file_path(single_url)
             )
-            if not rewrite_if_exists and not target_file.exists():
+            if not rewrite_if_exists and target_file.exists():
                 # Skip if existing files must not be rewritten.
                 raise FileExistsError("this file already exists")
-            with target_file.open('w') as file_handle:
-                file_handle.write(
-                    list_page.generate_page(single_url)
-                )
+            # Write content to file
+            _SinglePageHTML(
+                page_content=list_page.generate_page(single_url),
+                title=list_page.page_title,
+
+                # Generate blocks
+                meta_description=list_page.description,
+                meta_keywords=list_page.keywords,
+                menu=self.generate_menu(),
+                recent_posts=self.generate_recent_posts(),
+                tag_cloud=self.generate_tag_cloud(),
+                text_section_in_right_menu=self.generate_text_sections_in_right_menu()  # noqa: E501
+            ).write_to_file(target_file, self.layout_template)
 
     def generate_pages(
         self,
