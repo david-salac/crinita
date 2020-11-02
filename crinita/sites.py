@@ -384,12 +384,6 @@ class Sites(object):
                 exception is raised.
         """
         # Generate all articles
-        if isinstance(self.homepage, (Article, Page)):
-            self._generate_article_or_page(
-                article_or_page=self.homepage,
-                output_directory_path=output_directory_path,
-                rewrite_if_exists=rewrite_if_exists
-            )
         for article in self.list_of_articles:
             self._generate_article_or_page(
                 article_or_page=article,

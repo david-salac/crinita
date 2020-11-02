@@ -1,4 +1,4 @@
-# Crinita
+# Crinita: static website generator
 Author: David Salac <https://www.github.com/david-salac>
 
 Python application for generating static websites like a blog or
