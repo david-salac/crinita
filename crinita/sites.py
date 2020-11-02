@@ -444,9 +444,7 @@ class Sites(object):
                         )
                     else:
                         site_map_urls_with_prefix.append(
-                            Path(Config.site_map_url_prefix).joinpath(
-                                single_url
-                            )
+                            Config.site_map_url_prefix + single_url
                         )
                 sitemap_def: str = template.render(
                     urls=site_map_urls_with_prefix
