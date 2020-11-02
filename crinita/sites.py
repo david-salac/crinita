@@ -435,10 +435,19 @@ class Sites(object):
                 template = Environment(
                     loader=FileSystemLoader(Config.templates_path)
                 ).from_string(sitemap_template.read())
-                site_map_urls_with_prefix = [
-                    Config.site_map_url_prefix + single_url for
-                    single_url in self.site_map_urls
-                ]
+                site_map_urls_with_prefix: List[str] = []
+                for single_url in self.site_map_urls:
+                    if single_url == '/':
+                        # Causes troubles when merging routes
+                        site_map_urls_with_prefix.append(
+                            Config.site_map_url_prefix
+                        )
+                    else:
+                        site_map_urls_with_prefix.append(
+                            Path(Config.site_map_url_prefix).joinpath(
+                                single_url
+                            )
+                        )
                 sitemap_def: str = template.render(
                     urls=site_map_urls_with_prefix
                 )
