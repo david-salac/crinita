@@ -21,9 +21,14 @@ class Tag(object):
     url_alias: str
 
     @property
+    def url_alias_with_prefix(self):
+        """Return URL alias with prefix"""
+        return Utils.generate_file_path(Config.tag_url_prefix + self.url_alias)
+
+    @property
     def url(self) -> str:
         """Link for the page defining tag"""
-        return Utils.generate_file_path(self.url_alias)
+        return Utils.generate_file_path(self.url_alias_with_prefix)
 
     def __hash__(self):
         return self.url_alias.__hash__()

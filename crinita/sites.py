@@ -342,7 +342,7 @@ class Sites(object):
         if list_page is None:
             list_page: ListOfArticles = ListOfArticles(
                 list_of_articles=self.tag_to_articles[tag],
-                url_alias=tag.url_alias,
+                url_alias=tag.url_alias_with_prefix,
                 tag=tag
             )
         for single_url in list_page.url_list:

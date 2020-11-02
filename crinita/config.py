@@ -47,7 +47,8 @@ class Config(object):
         time_format (str): Time format to be used for the datetime.strftime
             function call.
         site_map_template (str): Path to the site-map template.
-        robots_txt (str): Content of the robots.txt file
+        robots_txt (str): Content of the robots.txt file.
+        tag_url_prefix (str): Prefix for tag URLs.
     """
     # Path to the templates
     templates_path: Path = Path(Path(__file__).parent, 'templates')
@@ -140,3 +141,6 @@ class Config(object):
     robots_txt: str = """User-agent: *
 Allow: /
 Sitemap: sitemap.xml"""
+
+    # Prefix for tag
+    tag_url_prefix: str = "tag-"
