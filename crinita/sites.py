@@ -105,8 +105,7 @@ class Sites(object):
 
     def __init__(
         self,
-        list_of_articles: List[Article],
-        list_of_pages: List[Page], *,
+        list_of_entities: List[Union[Article, Page]], *,
         check_url_unique: bool = True,
         layout_template: str = "__DEFAULT__",
         tag_cloud_template: str = "__DEFAULT__",
@@ -117,9 +116,8 @@ class Sites(object):
         """Create a new sites
 
         Args:
-             list_of_pages (List['Page']): List of all pages to be included.
-             list_of_articles (List['Article']): List of all articles to be
-                included.
+             list_of_entities (List[Union[Article, Page]]): List of all pages
+                and articles to be included.
              check_url_unique (bool): If True, uniqueness of URLs is checked.
              layout_template (str): Template file for the whole sites.
              tag_cloud_template (str): Template file for the tag cloud.
@@ -128,6 +126,14 @@ class Sites(object):
              text_sections_in_right_menu_template (str): Template for the text
                 section in right menu.
         """
+        # Separate Page and Article instances from all entities
+        list_of_articles: List[Article] = [
+            art for art in list_of_entities if isinstance(art, Article)
+        ]
+        list_of_pages: List[Page] = [
+            art for art in list_of_entities if isinstance(art, Page)
+        ]
+
         self.tag_cloud_template: str = tag_cloud_template
         self.menu_template: str = menu_template
         self.recent_posts_template: str = recent_posts_template
