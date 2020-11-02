@@ -23,7 +23,7 @@ class Tag(object):
     @property
     def url_alias_with_prefix(self):
         """Return URL alias with prefix"""
-        return Utils.generate_file_path(Config.tag_url_prefix + self.url_alias)
+        return Config.tag_url_prefix + self.url_alias
 
     @property
     def url(self) -> str:

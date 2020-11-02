@@ -149,7 +149,8 @@ class Sites(object):
             number_of_elements: int = 0
         # Process articles
         self._list_of_articles: List[Article] = sorted(list_of_articles,
-                                                       key=lambda x: x.date)
+                                                       key=lambda x: x.date,
+                                                       reverse=True)
         self._tag_to_articles: Dict[Tag, List[Article]] = defaultdict(list)
         self._tag_to_incidence: Dict[Tag, int] = defaultdict(int)
         for article in list_of_articles:
