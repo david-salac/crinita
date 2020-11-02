@@ -435,8 +435,13 @@ class Sites(object):
                 template = Environment(
                     loader=FileSystemLoader(Config.templates_path)
                 ).from_string(sitemap_template.read())
-
-                sitemap_def: str = template.render(urls=self.site_map_urls)
+                site_map_urls_with_prefix = [
+                    Config.site_map_url_prefix + single_url for
+                    single_url in self.site_map_urls
+                ]
+                sitemap_def: str = template.render(
+                    urls=site_map_urls_with_prefix
+                )
                 site_map_handler.write(sitemap_def)
 
         # Write robots.txt

@@ -5,5 +5,5 @@ from .config import Config  # noqa
 from .list_of_articles import ListOfArticles  # noqa
 from .sites import Sites  # noqa
 
-__version__ = "0.0.6"
+__version__ = "0.0.7"
 __status__ = "Production"

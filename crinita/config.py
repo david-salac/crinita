@@ -47,6 +47,8 @@ class Config(object):
         time_format (str): Time format to be used for the datetime.strftime
             function call.
         site_map_template (str): Path to the site-map template.
+        site_map_url_prefix (str): URL prefix for site-map (it always should
+            be a reference to existing URL).
         robots_txt (str): Content of the robots.txt file.
         tag_url_prefix (str): Prefix for tag URLs.
     """
@@ -136,6 +138,9 @@ class Config(object):
 
     # Site map template
     site_map_template: str = 'site_map.jnj'
+
+    # URL prefix for sitemap
+    site_map_url_prefix: str = ''
 
     # Robots.txt content
     robots_txt: str = """User-agent: *
