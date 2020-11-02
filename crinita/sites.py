@@ -162,6 +162,11 @@ class Sites(object):
             for tag in article.tags:
                 self._tag_to_articles[tag].append(article)
                 self._tag_to_incidence[tag] += 1
+        # Sort articles in tag by date of publishing
+        for tag in self.list_of_tags:
+            self._tag_to_articles[tag] = sorted(self._tag_to_articles[tag],
+                                                key=lambda x: x.date,
+                                                reverse=True)
         # Sort dictionary by values from the biggest to lowest
         self._tag_to_incidence = {
             k: v for k, v in sorted(self._tag_to_incidence.items(),
