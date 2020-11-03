@@ -16,3 +16,6 @@ can raise on GitHub.
 We would like to say thank you to anyone who has raised any pertinent
 issue already. We really do appreciate this as this is the leading
 force for innovations and improvements.
+
+## Where to find GitHub page
+Crinita GitHub project is located at https://github.com/david-salac/crinita
