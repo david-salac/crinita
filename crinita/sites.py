@@ -1,3 +1,5 @@
+import json
+import datetime
 from typing import List, Dict, Set, Optional, Union
 from pathlib import Path
 from collections import defaultdict
@@ -511,3 +513,31 @@ class Sites(object):
             homepage_ent = ListOfArticles(self.list_of_articles)
 
         return homepage_ent
+
+    @staticmethod
+    def object_from_json(json_str: str) -> Entity:
+        """Deserialize object (Page or Article) from JSON.
+
+        Args:
+            json_str (str): JSON string defining object.
+
+        Returns:
+            Entity: Concrete object.
+        """
+        deserialized: dict = json.loads(json_str)
+        type_obj = deserialized.pop('object_type')
+
+        if type_obj == Page.__name__:
+            return Page(**deserialized)
+        elif type_obj == Article.__name__:
+            # Extract tags
+            tags_def = deserialized.pop('tags')
+            tags = []
+            for tag_dict in tags_def:
+                tags.append(Tag(**tag_dict))
+            # Extract date:
+            date = datetime.datetime.strptime(deserialized.pop('date'),
+                                              "%Y-%m-%dT%H:%M:%S")
+            return Article(**deserialized, tags=tags, date=date)
+
+        raise ValueError("Unsupported type of object")

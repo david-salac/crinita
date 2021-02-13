@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="crinita",
-    version="0.1.1",
+    version="1.0.1",
     author="David Salac",
     author_email="info@davidsalac.eu",
     description="Python application for generating static websites like"

@@ -1,5 +1,6 @@
-from typing import Optional, List
+from typing import Optional, List, Any
 import datetime
+import json
 from dataclasses import dataclass
 
 from jinja2 import Environment, FileSystemLoader
@@ -33,6 +34,29 @@ class Tag(object):
     def __hash__(self):
         return self.url_alias.__hash__()
 
+    def keys(self) -> List[str]:
+        """Get keys that allows conversion of this class to dictionary.
+
+        Returns:
+            List[str]: List of the keys.
+        """
+        return ['name', 'url_alias']
+
+    def __getitem__(self, key):
+        """Allows conversion of this class to dictionary.
+        """
+        return getattr(self, key)
+
+
+class JSONEncoderWithTags(json.JSONEncoder):
+    """Allow to serialize tags"""
+    def default(self, o: Any) -> Any:
+        if isinstance(o, Tag):
+            return dict(o)
+        elif isinstance(o, (datetime.date, datetime.datetime)):
+            return o.isoformat()
+        return super().default(o)
+
 
 class Article(Entity):
     """Represents the single blog post.
@@ -45,6 +69,7 @@ class Article(Entity):
         content (str): Content of the article.
         tags (List[Tag]): Tags related to the article.
     """
+    JSON_ENCODER = JSONEncoderWithTags
 
     def __init__(
         self,
