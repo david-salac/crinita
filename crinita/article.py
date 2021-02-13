@@ -80,7 +80,7 @@ class Article(Entity):
         date: datetime.datetime,
         lead: str,
         content: str,
-        tags: List[Tag] = [],
+        tags: List[Tag] = tuple(),
         template: str = '__DEFAULT__',
         description: Optional[str] = None,
         keywords: Optional[str] = None
@@ -102,8 +102,6 @@ class Article(Entity):
             lead (str): Lead of the article.
             content (str): Content of the article.
         """
-        if template == "__DEFAULT__":
-            template = Config.default_article_template
         # Call the entity constructor to pass meta tags
         if keywords is None and len(tags) > 0:
             keywords = ", ".join([single_tag.name for single_tag in tags])
@@ -135,7 +133,10 @@ class Article(Entity):
         return getattr(self, key)
 
     def generate_page(self, url: str) -> str:
-        with open(Config.templates_path.joinpath(self.template)) as tem_han:
+        if self.template == "__DEFAULT__":
+            template = Config.default_article_template
+
+        with open(Config.templates_path.joinpath(template)) as tem_han:
             template = Environment(
                 loader=FileSystemLoader(Config.templates_path)
             ).from_string(tem_han.read())

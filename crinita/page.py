@@ -42,9 +42,6 @@ class Page(Entity):
             menu_position (Optional[int]): Position of the page in the menu.
                 If None, page is not listed in menu.
         """
-        if template == "__DEFAULT__":
-            template = Config.default_page_template
-
         # Call the entity constructor to pass meta tags
         super().__init__(template, title, description, keywords, url_alias)
 
@@ -68,7 +65,10 @@ class Page(Entity):
         return getattr(self, key)
 
     def generate_page(self, url: str) -> str:
-        with open(Config.templates_path.joinpath(self.template)) as tem_han:
+        if self.template == "__DEFAULT__":
+            template = Config.default_page_template
+
+        with open(Config.templates_path.joinpath(template)) as tem_han:
             template = Environment(
                 loader=FileSystemLoader(Config.templates_path)
             ).from_string(tem_han.read())

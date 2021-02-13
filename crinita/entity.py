@@ -66,9 +66,6 @@ class Entity(abc.ABC):
         """Generate the page title in the logic:
             SITE_NAME + SEPARATOR + TITLE
 
-        Args:
-            title (str): Title of the current page.
-
         Returns:
             str: Generated page title as a meta tag.
         """
