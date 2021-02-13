@@ -1,4 +1,5 @@
 import json
+import copy
 import datetime
 from typing import List, Dict, Set, Optional, Union
 from pathlib import Path
@@ -102,8 +103,10 @@ class Sites(object):
         tag_cloud_template (str): Template file for the tag cloud.
         menu_template (str): Template file for the menu.
         recent_posts_template (str): Template file for the recent posts.
-        site_map_urls (List[str]): List of all URLs in the app
+        _site_map_urls (List[str]): List of all URLs in the app
     """
+    # Define JSON encoder for the object
+    JSON_ENCODER = json.JSONEncoder
 
     def __init__(
         self,
@@ -141,9 +144,7 @@ class Sites(object):
         self.recent_posts_template: str = recent_posts_template
         self.text_sections_in_right_menu_template: str = \
             text_sections_in_right_menu_template
-        self.sites_template: str = layout_template
-        if layout_template == "__DEFAULT__":
-            self.layout_template = Config.default_layout_template
+        self.layout_template: str = layout_template
 
         if check_url_unique:
             # For sanity check (uniqueness of URLs)
@@ -189,7 +190,7 @@ class Sites(object):
             if len(all_urls) != number_of_elements:
                 raise ValueError("Not all URLs are unique!")
 
-        self.site_map_urls: List[str] = []
+        self._site_map_urls: List[str] = []
 
     @lru_cache()
     def generate_tag_cloud(self) -> str:
@@ -316,6 +317,9 @@ class Sites(object):
         if not rewrite_if_exists and target_file.exists():
             # Skip if existing files must not be rewritten.
             raise FileExistsError("this file already exists")
+        # Parse layout template
+        if self.layout_template == "__DEFAULT__":
+            layout_template = Config.default_layout_template
         # Write content to file
         _SinglePageHTML(
             page_content=article_or_page.generate_page(
@@ -330,10 +334,10 @@ class Sites(object):
             recent_posts=self.generate_recent_posts(),
             tag_cloud=self.generate_tag_cloud(),
             text_section_in_right_menu=self.generate_text_sections_in_right_menu()  # noqa: E501
-        ).write_to_file(target_file, self.layout_template)
+        ).write_to_file(target_file, layout_template)
 
         # Append to site map
-        self.site_map_urls.append(article_or_page.url)
+        self._site_map_urls.append(article_or_page.url)
 
     def _generate_list_of_articles_with_pagination(
         self,
@@ -359,6 +363,10 @@ class Sites(object):
                 url_alias=tag.url_alias_with_prefix,
                 tag=tag
             )
+        # Parse layout template
+        if self.layout_template == "__DEFAULT__":
+            layout_template = Config.default_layout_template
+
         for single_url in list_page.url_list:
             target_file: Path = Path(
                 output_directory_path, Utils.generate_file_path(single_url,
@@ -379,10 +387,10 @@ class Sites(object):
                 recent_posts=self.generate_recent_posts(),
                 tag_cloud=self.generate_tag_cloud(),
                 text_section_in_right_menu=self.generate_text_sections_in_right_menu()  # noqa: E501
-            ).write_to_file(target_file, self.layout_template)
+            ).write_to_file(target_file, layout_template)
 
             # Append to site map
-            self.site_map_urls.append(Utils.generate_file_path(single_url))
+            self._site_map_urls.append(Utils.generate_file_path(single_url))
 
     def generate_pages(
         self,
@@ -438,7 +446,7 @@ class Sites(object):
                     loader=FileSystemLoader(Config.templates_path)
                 ).from_string(sitemap_template.read())
                 site_map_urls_with_prefix: List[str] = []
-                for single_url in self.site_map_urls:
+                for single_url in self._site_map_urls:
                     if single_url == '/':
                         # Causes troubles when merging routes
                         site_map_urls_with_prefix.append(
@@ -524,7 +532,11 @@ class Sites(object):
         Returns:
             Entity: Concrete object.
         """
-        deserialized: dict = json.loads(json_str)
+        if isinstance(json_str, str):
+            deserialized: dict = json.loads(json_str)
+        else:
+            deserialized: dict = copy.deepcopy(json_str)
+
         type_obj = deserialized.pop('object_type')
 
         if type_obj == Page.__name__:
@@ -541,3 +553,43 @@ class Sites(object):
             return Article(**deserialized, tags=tags, date=date)
 
         raise ValueError("Unsupported type of object")
+
+    @property
+    def json(self) -> str:
+        """Serialize sites to JSON
+
+        Returns:
+            str: JSON representation of sites
+        """
+        json_def = {}
+        for _var in vars(self):
+            if not _var.startswith("_"):
+                json_def[_var] = getattr(self, _var)
+        # Serialize entities:
+        all_entities = []
+        for page in self._list_of_pages:
+            all_entities.append(json.loads(page.json))
+        for article in self._list_of_articles:
+            all_entities.append(json.loads(article.json))
+        json_def['list_of_entities'] = all_entities
+        # Serialize result
+        return json.dumps(json_def, cls=self.JSON_ENCODER)
+
+    @classmethod
+    def sites_from_json(cls, json_str: str) -> 'Sites':
+        """Deserialize sites from JSON string.
+        Args:
+            json_str (str): Input JSON string.
+        Returns:
+            Sites: new sites from JSON string.
+        """
+        if isinstance(json_str, str):
+            deserialized: dict = json.loads(json_str)
+        else:
+            deserialized: dict = copy.deepcopy(json_str)
+        list_of_entities = deserialized.pop('list_of_entities')
+        entities = []
+        for entity_def in list_of_entities:
+            entities.append(cls.object_from_json(entity_def))
+        deserialized['list_of_entities'] = entities
+        return cls(**deserialized)
