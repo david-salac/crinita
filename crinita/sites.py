@@ -6,6 +6,8 @@ from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import lru_cache
+import shutil
+import tempfile
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -405,6 +407,12 @@ class Sites(object):
             rewrite_if_exists (bool): If True, files are rewritten; if False,
                 exception is raised.
         """
+        # Copy resources
+        if Config.resources_path:
+            shutil.copytree(Config.resources_path,
+                            output_directory_path,
+                            dirs_exist_ok=True)
+
         # Generate all articles
         for article in self.list_of_articles:
             self._generate_article_or_page(
@@ -593,3 +601,50 @@ class Sites(object):
             entities.append(cls.object_from_json(entity_def))
         deserialized['list_of_entities'] = entities
         return cls(**deserialized)
+
+    def archive(self,
+                archive_file_path: Path,
+                content_file_name: str = "content.json",
+                config_file_name: str = "config.json",
+                layouts_dir_name: str = "LAYOUTS",
+                resources_dir_name: str = "RESOURCES") -> None:
+        """Archive the whole sites (including layouts and resources) to
+            the archive ZIP file.
+
+        Args:
+            archive_file_path (Path): Path to the ZIP file. Rewrite its
+                content if exists or create a new one.
+            content_file_name (str): Name of file for JSON content of sites.
+            config_file_name (str): Name of JSON with configuration.
+            layouts_dir_name (str): Name of directory for layouts.
+            resources_dir_name (str): Name of directory for resources.
+        """
+        # Create a temporary directory for outputs
+        archive_dir = tempfile.mkdtemp()
+
+        # Create a file for web-site text content in JSON
+        content_path_to_json: Path = Path(archive_dir, content_file_name)
+        with content_path_to_json.open('w') as cont_fp:
+            cont_fp.write(self.json)
+
+        # Archive Config class
+        config_path_to_json: Path = Path(archive_dir, config_file_name)
+        with config_path_to_json.open('w') as config_fp:
+            config_fp.write(Config.to_json())
+
+        # Copy layouts
+        shutil.copytree(Config.templates_path,
+                        Path(archive_dir, layouts_dir_name),
+                        dirs_exist_ok=True)
+
+        # Copy resources
+        if Config.resources_path:
+            shutil.copytree(Config.resources_path,
+                            Path(archive_dir, resources_dir_name),
+                            dirs_exist_ok=True)
+
+        # Create archive
+        shutil.make_archive(str(archive_file_path), 'zip', archive_dir)
+
+        # Remove archive directory
+        shutil.rmtree(archive_dir)

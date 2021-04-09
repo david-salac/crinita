@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="crinita",
-    version="1.0.1",
+    version="1.1.0",
     author="David Salac",
     author_email="info@davidsalac.eu",
     description="Python application for generating static websites like"
@@ -16,6 +16,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/david-salac/crinita",
     packages=setuptools.find_packages(),
+    package_data={'': ['templates/*']},
     install_requires=['Jinja2', ],
     classifiers=[
         "Programming Language :: Python :: 3",

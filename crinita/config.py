@@ -1,6 +1,7 @@
+import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Optional
 
 
 @dataclass
@@ -9,6 +10,8 @@ class Config(object):
 
     Attributes:
         templates_path (Path): Path to the folder with templates.
+        resources_path (Optional[Path]): Path to directory with resources. If
+            set, the content of the directory is copied to output folder.
         default_css_style_path (Path): Path to css styles
         default_layout_template (str): Default template file for websites.
         default_page_template (str): Default template for the page.
@@ -54,6 +57,7 @@ class Config(object):
     """
     # Path to the templates
     templates_path: Path = Path(Path(__file__).parent, 'templates')
+    resources_path: Optional[Path] = None
 
     # Path to CSS styles
     default_css_style_path: Path = Path('style.css')
@@ -149,3 +153,45 @@ Sitemap: sitemap.xml"""
 
     # Prefix for tag
     tag_url_prefix: str = "tag-"
+
+    # Functionality for serialization to JSON:
+    @classmethod
+    def to_json(cls) -> str:
+        """Serialize to JSON.
+        Returns:
+            str: JSON representation of Config class
+        """
+        json_def = {}
+        for _var in vars(cls):
+            if _var.startswith("_"):
+                continue
+            if callable(getattr(cls, _var)):
+                continue
+            json_def[_var] = getattr(cls, _var)
+            if isinstance(json_def[_var], Path):
+                json_def[_var] = str(json_def[_var])
+        # Serialize the object type name
+        json_def['object_type'] = cls.__name__
+        return json.dumps(json_def)
+
+    @classmethod
+    def from_json(cls, json_str: str) -> None:
+        """Set-up class from JSON.
+
+        Args:
+            json_str (str): JSON definition of Config class.
+        """
+        objs: dict = json.loads(json_str)  # Deserialize JSON
+        object_type = objs.pop('object_type')
+        if object_type != cls.__name__:
+            raise ValueError(f"Value of object_type has to be {cls.__name__}")
+
+        path_vars = set()
+        for _var in vars(cls):
+            if isinstance(getattr(cls, _var), Path):
+                path_vars.add(_var)
+
+        for _key, _val in objs.items():
+            setattr(cls, _key, _val)
+            if _key in path_vars:
+                setattr(cls, _key, Path(_val))
