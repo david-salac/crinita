@@ -1,12 +1,10 @@
-from typing import Optional, List
+from typing import Optional, Any
 
-from jinja2 import Environment, FileSystemLoader
-
-from .entity import Entity
 from .config import Config
+from .entity_detail import EntityDetail
 
 
-class Page(Entity):
+class Page(EntityDetail):
     """Represents the single blog post.
 
     Attributes:
@@ -26,7 +24,8 @@ class Page(Entity):
         menu_position: Optional[int] = None,
         template: str = '__DEFAULT__',
         description: Optional[str] = None,
-        keywords: Optional[str] = None
+        keywords: Optional[str] = None,
+        template_parameters: dict[str, Any] = None
     ):
         """Create the new blog post.
 
@@ -41,21 +40,25 @@ class Page(Entity):
             content (str): Content of the article.
             menu_position (Optional[int]): Position of the page in the menu.
                 If None, page is not listed in menu.
+            template_parameters (dict[str, Any]): All other additional
+                parameters that are passed to the template engine.
         """
-        # Call the entity constructor to pass meta tags
-        super().__init__(template, title, description, keywords, url_alias)
+        if template == "__DEFAULT__":
+            template = Config.default_page_template
 
-        self.url_list = [url_alias]
+        # Call the entity constructor to pass meta tags
+        super().__init__(template, title, description, keywords, url_alias,
+                         template_parameters=template_parameters)
 
         self.large_image_path: str = large_image_path
         self.content: str = content
         self.menu_position: Optional[int] = menu_position
 
-    def keys(self) -> List[str]:
+    def keys(self) -> list[str]:
         """Get keys that allows conversion of this class to dictionary.
 
         Returns:
-            List[str]: List of the keys to be passed to template.
+            list[str]: List of the keys to be passed to template.
         """
         return ['title', 'large_image_path', 'content']
 
@@ -63,16 +66,3 @@ class Page(Entity):
         """Allows conversion of this class to dictionary.
         """
         return getattr(self, key)
-
-    def generate_page(self, url: str) -> str:
-        if self.template == "__DEFAULT__":
-            template = Config.default_page_template
-
-        with open(Config.templates_path.joinpath(template)) as tem_han:
-            template = Environment(
-                loader=FileSystemLoader(Config.templates_path)
-            ).from_string(tem_han.read())
-            html_str = template.render(
-                **dict(self)
-            )
-            return html_str

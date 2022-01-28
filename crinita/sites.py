@@ -1,7 +1,7 @@
 import json
 import copy
 import datetime
-from typing import List, Dict, Set, Optional, Union
+from typing import Optional
 from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass
@@ -32,17 +32,20 @@ class _SinglePageHTML(object):
     meta_description: str = None
     meta_keywords: str = None
     meta_author: str = None
-    css_style_file: str = None
     append_to_head_tag: str = None
     homepage_link: str = None
     site_logo_text: str = None
     footer: str = None
+    # Additional template parameters (defined by entity and global
+    template_parameters: Optional[dict[str, object]] = None
+    # Path to CSS file
+    css_style_path: str = None
 
-    def keys(self) -> List[str]:
+    def keys(self) -> list[str]:
         """Get keys that allows conversion of this class to dictionary.
 
         Returns:
-            List[str]: List of the keys to be passed to template.
+            list[str]: List of the keys to be passed to template.
         """
         return [atr for atr in vars(self) if '__' not in atr]
 
@@ -53,15 +56,20 @@ class _SinglePageHTML(object):
 
     def write_to_file(
         self,
-        file_path: Path,
-        layout_template_path: Path
+        file_path: Path | str,
+        layout_template_path: Path | str
     ) -> None:
         """Write page content to the HTML file.
 
         Args:
-            file_path (Path): Path to the file
-            layout_template_path (Path): Path to the layout template
+            file_path (Path | str): Path to the file
+            layout_template_path (Path | str): Path to the layout template
         """
+        if type(file_path) == str:
+            file_path = Path(file_path)
+        if type(layout_template_path) == str:
+            layout_template_path = Path(layout_template_path)
+
         if self.meta_description is None:
             self.meta_description = Config.default_meta_description
         if self.meta_keywords is None:
@@ -72,12 +80,12 @@ class _SinglePageHTML(object):
             self.append_to_head_tag = Config.append_to_head_tag
         if self.footer is None:
             self.footer = Config.footer
-        if self.css_style_file is None:
-            self.css_style_file = str(Config.default_css_style_path)
         if self.site_logo_text is None:
             self.site_logo_text = Config.site_logo_text
         if self.homepage_link is None:
             self.homepage_link = Config.site_home_url
+        if self.css_style_path is None:
+            self.css_style_path = Config.css_style_path.name
 
         with Config.templates_path.joinpath(
             layout_template_path
@@ -105,39 +113,40 @@ class Sites(object):
         tag_cloud_template (str): Template file for the tag cloud.
         menu_template (str): Template file for the menu.
         recent_posts_template (str): Template file for the recent posts.
-        _site_map_urls (List[str]): List of all URLs in the app
+        _site_map_urls (list[str]): List of all URLs in the app
+        _homepage (Entity): Entity that represents homepage
     """
     # Define JSON encoder for the object
     JSON_ENCODER = json.JSONEncoder
 
     def __init__(
         self,
-        list_of_entities: List[Union[Article, Page]], *,
+        list_of_entities: list[Article | Page], *,
         check_url_unique: bool = True,
-        layout_template: str = "__DEFAULT__",
+        layout_template: str | Path = "__DEFAULT__",
         tag_cloud_template: str = "__DEFAULT__",
         menu_template: str = "__DEFAULT__",
         recent_posts_template: str = "__DEFAULT__",
-        text_sections_in_right_menu_template: str = "__DEFAULT__",
+        text_sections_in_right_menu_template: str = "__DEFAULT__"
     ):
         """Create a new sites
 
         Args:
-             list_of_entities (List[Union[Article, Page]]): List of all pages
-                and articles to be included.
-             check_url_unique (bool): If True, uniqueness of URLs is checked.
-             layout_template (str): Template file for the whole sites.
-             tag_cloud_template (str): Template file for the tag cloud.
-             menu_template (str): Template file for the menu.
-             recent_posts_template (str): Template file for the recent posts.
-             text_sections_in_right_menu_template (str): Template for the text
-                section in right menu.
+            list_of_entities (list[Article | Page]): List of all pages
+               and articles to be included.
+            check_url_unique (bool): If True, uniqueness of URLs is checked.
+            layout_template (str | Path): Template file for the whole sites.
+            tag_cloud_template (str): Template file for the tag cloud.
+            menu_template (str): Template file for the menu.
+            recent_posts_template (str): Template file for the recent posts.
+            text_sections_in_right_menu_template (str): Template for the text
+               section in right menu.
         """
         # Separate Page and Article instances from all entities
-        list_of_articles: List[Article] = [
+        list_of_articles: list[Article] = [
             art for art in list_of_entities if isinstance(art, Article)
         ]
-        list_of_pages: List[Page] = [
+        list_of_pages: list[Page] = [
             art for art in list_of_entities if isinstance(art, Page)
         ]
 
@@ -146,18 +155,18 @@ class Sites(object):
         self.recent_posts_template: str = recent_posts_template
         self.text_sections_in_right_menu_template: str = \
             text_sections_in_right_menu_template
-        self.layout_template: str = layout_template
+        self.layout_template: str | Path = layout_template
 
         if check_url_unique:
             # For sanity check (uniqueness of URLs)
-            all_urls: Set[str] = set([])
+            all_urls: set[str] = set([])
             number_of_elements: int = 0
         # Process articles
-        self._list_of_articles: List[Article] = sorted(list_of_articles,
+        self._list_of_articles: list[Article] = sorted(list_of_articles,
                                                        key=lambda x: x.date,
                                                        reverse=True)
-        self._tag_to_articles: Dict[Tag, List[Article]] = defaultdict(list)
-        self._tag_to_incidence: Dict[Tag, int] = defaultdict(int)
+        self._tag_to_articles: dict[Tag, list[Article]] = defaultdict(list)
+        self._tag_to_incidence: dict[Tag, int] = defaultdict(int)
         for article in list_of_articles:
             if check_url_unique:
                 # Add url to set (for sanity check)
@@ -179,7 +188,7 @@ class Sites(object):
                                     reverse=True)
         }
         # Process pages
-        self._list_of_pages: List[Page] = sorted(
+        self._list_of_pages: list[Page] = sorted(
             list_of_pages,
             key=lambda x: x.menu_position if x.menu_position else -1
         )
@@ -192,7 +201,8 @@ class Sites(object):
             if len(all_urls) != number_of_elements:
                 raise ValueError("Not all URLs are unique!")
 
-        self._site_map_urls: List[str] = []
+        self._site_map_urls: list[str] = []
+        self._homepage: Entity = None
 
     @lru_cache()
     def generate_tag_cloud(self) -> str:
@@ -239,6 +249,8 @@ class Sites(object):
                              external_item['menu_position'])
             if item.url == "__HOME_PAGE__":
                 item.url = Config.site_home_url
+            if item.url == "__BLOG__":
+                item.url = Utils.generate_file_path(Config.blog_url)
             external_items.append(item)
         all_items_in_menu: list = self.list_of_pages_in_menu + external_items
 
@@ -297,9 +309,9 @@ class Sites(object):
                 right_menu_text += template.render(**item)
             return right_menu_text
 
-    def _generate_article_or_page(
+    def _generate_entity(
         self,
-        article_or_page: Union[Article, Page],
+        page_entity: Article | Page,
         output_directory_path: Path,
         rewrite_if_exists: bool
     ) -> None:
@@ -313,7 +325,7 @@ class Sites(object):
         """
         target_file: Path = Path(
             output_directory_path, Utils.generate_file_path(
-                article_or_page.url_alias, True
+                page_entity.url_alias, True
             )
         )
         if not rewrite_if_exists and target_file.exists():
@@ -322,16 +334,22 @@ class Sites(object):
         # Parse layout template
         if self.layout_template == "__DEFAULT__":
             layout_template = Config.default_layout_template
+        else:
+            layout_template = self.layout_template
+
         # Write content to file
         _SinglePageHTML(
-            page_content=article_or_page.generate_page(
-                article_or_page.url_alias
+            page_content=page_entity.generate_page(
+                page_entity.url_alias
             ),
-            title=article_or_page.page_title,
+            title=page_entity.page_title,
+            # Additional (optional) parameters merged with global version
+            template_parameters=Config.global_template_parameters | \
+                                page_entity.template_parameters,
 
             # Generate blocks
-            meta_description=article_or_page.description,
-            meta_keywords=article_or_page.keywords,
+            meta_description=page_entity.description,
+            meta_keywords=page_entity.keywords,
             menu=self.generate_menu(),
             recent_posts=self.generate_recent_posts(),
             tag_cloud=self.generate_tag_cloud(),
@@ -339,11 +357,11 @@ class Sites(object):
         ).write_to_file(target_file, layout_template)
 
         # Append to site map
-        self._site_map_urls.append(article_or_page.url)
+        self._site_map_urls.append(page_entity.url)
 
     def _generate_list_of_articles_with_pagination(
         self,
-        tag: Tag,
+        tag: Optional[Tag],
         output_directory_path: Path,
         rewrite_if_exists: bool, *,
         list_page: Optional[ListOfArticles] = None
@@ -361,13 +379,15 @@ class Sites(object):
         """
         if list_page is None:
             list_page: ListOfArticles = ListOfArticles(
+                title=tag.name,
                 list_of_articles=self.tag_to_articles[tag],
-                url_alias=tag.url_alias_with_prefix,
-                tag=tag
+                url_alias=tag.url_alias_with_prefix
             )
         # Parse layout template
         if self.layout_template == "__DEFAULT__":
             layout_template = Config.default_layout_template
+        else:
+            layout_template = self.layout_template
 
         for single_url in list_page.url_list:
             target_file: Path = Path(
@@ -407,16 +427,27 @@ class Sites(object):
             rewrite_if_exists (bool): If True, files are rewritten; if False,
                 exception is raised.
         """
+        # Create target directory
+        if rewrite_if_exists:
+            if not output_directory_path.exists():
+                output_directory_path.mkdir()
+
         # Copy resources
         if Config.resources_path:
             shutil.copytree(Config.resources_path,
                             output_directory_path,
                             dirs_exist_ok=True)
+        # Copy CSS style file
+        if Config.css_style_path:
+            shutil.copy2(
+                Config.css_style_path,
+                output_directory_path / Config.css_style_path.name
+            )
 
         # Generate all articles
         for article in self.list_of_articles:
-            self._generate_article_or_page(
-                article_or_page=article,
+            self._generate_entity(
+                page_entity=article,
                 output_directory_path=output_directory_path,
                 rewrite_if_exists=rewrite_if_exists
             )
@@ -435,11 +466,18 @@ class Sites(object):
                 output_directory_path=output_directory_path,
                 rewrite_if_exists=rewrite_if_exists,
             )
+        if Config.blog_url:
+            self._generate_list_of_articles_with_pagination(
+                tag=None,
+                output_directory_path=output_directory_path,
+                rewrite_if_exists=rewrite_if_exists,
+                list_page=self.generate_blog(Config.blog_title, Config.blog_url)
+            )
 
         # Generate all pages
         for page in self.list_of_pages:
-            self._generate_article_or_page(
-                article_or_page=page,
+            self._generate_entity(
+                page_entity=page,
                 output_directory_path=output_directory_path,
                 rewrite_if_exists=rewrite_if_exists
             )
@@ -453,7 +491,7 @@ class Sites(object):
                 template = Environment(
                     loader=FileSystemLoader(Config.templates_path)
                 ).from_string(sitemap_template.read())
-                site_map_urls_with_prefix: List[str] = []
+                site_map_urls_with_prefix: list[str] = []
                 for single_url in self._site_map_urls:
                     if single_url == '/':
                         # Causes troubles when merging routes
@@ -509,6 +547,9 @@ class Sites(object):
             url_alias set to None. If there is not any Entity, the new one
             is created as a list of all articles in the system.
         """
+        if self._homepage:
+            return self._homepage
+
         # Run through all pages:
         homepage_ent: Entity = None
         for page in self.list_of_pages:
@@ -526,9 +567,34 @@ class Sites(object):
 
         # If there is no explicit homepage, generate as a list of all articles
         if homepage_ent is None:
-            homepage_ent = ListOfArticles(self.list_of_articles)
+            homepage_ent = self.generate_blog(None, None)
 
+        self._homepage = homepage_ent
         return homepage_ent
+
+    @homepage.setter
+    def homepage(self, value: Entity):
+        """Set the homepage."""
+        if value.url_alias is not None:
+            raise AttributeError('url_alias has to be None value')
+        self._homepage = value
+
+    @lru_cache()
+    def generate_blog(self,
+                      title: Optional[str],
+                      url_alias: Optional[str]) -> ListOfArticles:
+        """Generate blog (list of articles without tag).
+        Args:
+            title (Optional[str]): Title of the page.
+            url_alias (Optional[str]): URL prefix for page.
+        Return:
+            ListOfArticles: Blog articles.
+        """
+        return ListOfArticles(
+            title=title,
+            list_of_articles=self.list_of_articles,
+            url_alias=url_alias
+        )
 
     @staticmethod
     def object_from_json(json_str: str) -> Entity:

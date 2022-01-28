@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple, Dict, Optional
+from typing import Optional, Any
 
 
 @dataclass
@@ -12,10 +12,11 @@ class Config(object):
         templates_path (Path): Path to the folder with templates.
         resources_path (Optional[Path]): Path to directory with resources. If
             set, the content of the directory is copied to output folder.
-        default_css_style_path (Path): Path to css styles
+        css_style_path (Path): Path to css styles
         default_layout_template (str): Default template file for websites.
         default_page_template (str): Default template for the page.
         default_article_template (str): Default template for the article.
+        default_dataset_template (str): Default template for the dataset.
         maximal_tag_cloud_size (int): Maximal number of elements in tag cloud.
         default_tag_cloud_template (str): Template to generate tag cloud.
         default_menu_template (str): Template for the menu.
@@ -42,11 +43,11 @@ class Config(object):
         footer (str): Footer of the page.
         append_to_head_tag (str): Text that is appended to the header tag
             in the HTML page (before the style is imported).
-        append_to_menu (Tuple[Dict[str, str]]): Tuple of items that are added
-            to the menu. Contains dictionaries with keys: 'title' which is the
-            name of the item, 'url' which is the link (__HOME_PAGE__ if the
-            homepage is meant to be the target), 'menu_position' which is the
-            position inside menu.
+        append_to_menu (tuple[dict[str, str | int]]): Tuple of items that are
+            added to the menu. Contains dictionaries with keys: 'title' which
+            is the name of the item, 'url' which is the link (__HOME_PAGE__ if
+            the homepage is meant to be the target), 'menu_position' which is
+            the position inside menu.
         time_format (str): Time format to be used for the datetime.strftime
             function call.
         site_map_template (str): Path to the site-map template.
@@ -54,13 +55,16 @@ class Config(object):
             be a reference to existing URL).
         robots_txt (str): Content of the robots.txt file.
         tag_url_prefix (str): Prefix for tag URLs.
+        template_parameters (dict[str, Any]): Global additional template
+            engine parameters.
     """
     # Path to the templates
     templates_path: Path = Path(Path(__file__).parent, 'templates')
     resources_path: Optional[Path] = None
 
     # Path to CSS styles
-    default_css_style_path: Path = Path('style.css')
+    css_style_path: Path = Path(Path(__file__).parent,
+                                'templates', 'style.css')
 
     # Template for whole sites
     default_layout_template: str = "layout.jnj"
@@ -70,6 +74,9 @@ class Config(object):
 
     # Template to page
     default_page_template: str = "article.jnj"
+
+    # Template to page
+    default_dataset_template: str = "dataset.jnj"
 
     # Template to article list
     default_article_list_template: str = "article_list.jnj"
@@ -107,7 +114,7 @@ class Config(object):
 
     # Text in right menu
     default_text_sections_in_right_menu_template: str = 'text_in_menu.jnj'
-    text_sections_in_right_menu: Tuple[Dict[str, str]] = (
+    text_sections_in_right_menu: tuple[dict[str, str]] = (
         {
             "header": "About",
             "content": 'Generated using <a href="http://www.crinita.com/">Crinita</a>.'  # noqa: E501
@@ -116,7 +123,9 @@ class Config(object):
 
     # Default footer of page
     footer: str = '<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />All the content is licensed under a <br><a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>'  # noqa: E501
-    append_to_head_tag: str = '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">'  # noqa: E501
+    append_to_head_tag: str = '''<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">'''
 
     # Default meta tags values
     default_meta_description = "Some blog"
@@ -124,14 +133,15 @@ class Config(object):
     default_meta_meta_author = "Crinita"
 
     # Menu configuration
-    append_to_menu: Tuple[Dict[str, str]] = (
+    append_to_menu: tuple[dict[str, str | int]] = (
         {
             "title": "HOME",
-            "url": "__HOME_PAGE__",  # Either __HOME_PAGE__ or external link
+            # Either __HOME_PAGE__, __BLOG__ or External Link
+            "url": "__HOME_PAGE__",
             "menu_position": 0
         },
         {
-            "title": "Smth external",
+            "title": "External link",
             "url": "http://github.com",
             "menu_position": 21
         },
@@ -153,6 +163,19 @@ Sitemap: sitemap.xml"""
 
     # Prefix for tag
     tag_url_prefix: str = "tag-"
+
+    # URL for blog page (if referenced directly in menu)
+    blog_url: Optional[str] = "blog"  # Of None, nothing is generated
+    blog_title: str = "Blog"
+
+    template_parameters: dict[str, Any] = None
+
+    @classmethod
+    @property
+    def global_template_parameters(cls) -> dict[str, Any]:
+        if cls.template_parameters:
+            return cls.template_parameters
+        return {}
 
     # Functionality for serialization to JSON:
     @classmethod

@@ -8,13 +8,12 @@
     <meta name="author" content="{{ meta_author }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {{ append_to_head_tag }}
-    <link rel="stylesheet" href="{{ css_style_file }}">
+    <link rel="stylesheet" href="{{ css_style_path }}">
 </head>
 <body>
     <div id="container">
         <nav>
             <a href="{{ homepage_link }}" id="logo">
-                <span id="icon">&nbsp;</span>
                 {{ site_logo_text }}
             </a>
             {{ menu }}
