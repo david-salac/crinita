@@ -18,12 +18,14 @@ class DataEntity(object):
         description (Optional[str]): Description of data entity.
         license (Optional[str]): License string.
         icon (Optional[str]): Image (icon) visualising data type.
+        extension (Optional[str]): Extension of the file (used in preview).
     """
     title: str
     data_link: str
     description: Optional[str] = None
     license: Optional[str] = None
     icon: Optional[str] = None
+    extension: Optional[str] = None
 
     def keys(self) -> list[str]:
         """Get keys that allows conversion of this class to dictionary.
@@ -31,7 +33,8 @@ class DataEntity(object):
         Returns:
             list[str]: List of the keys.
         """
-        return ['title', 'data_link', 'description', 'license', 'icon']
+        return ['title', 'data_link', 'description', 'license', 'icon',
+                'extension']
 
     def __getitem__(self, key):
         """Allows conversion of this class to dictionary.
@@ -64,6 +67,7 @@ class Dataset(EntityDetail):
         data_entities (list[DataEntity]): Concrete data entities.
         data_source (Optional[str]): Source and info about data origin.
         maintainer (Optional[str]): Info and contact about data maintainer.
+        license (Optional[str]): License info.
     """
     JSON_ENCODER = JSONEncoderWithTagsAndDataEntities
 
@@ -79,6 +83,7 @@ class Dataset(EntityDetail):
         data_entities: list[DataEntity] = tuple(),
         data_source: Optional[str] = None,
         maintainer: Optional[str] = None,
+        license: Optional[str] = None,
 
         large_image_path: Optional[str | Path] = None,
         small_image_path: Optional[str | Path] = None,
@@ -112,6 +117,7 @@ class Dataset(EntityDetail):
             data_entities (list[DataEntity]): Concrete data entities.
             data_source (Optional[str]): Source and info about data origin.
             maintainer (Optional[str]): Info and contact about data maintainer.
+            license (Optional[str]): License info.
         """
         if template == "__DEFAULT__":
             template = Config.default_dataset_template
@@ -136,6 +142,7 @@ class Dataset(EntityDetail):
         self.data_entities: list[DataEntity] = data_entities
         self.data_source: Optional[str] = data_source
         self.maintainer: Optional[str] = maintainer
+        self.license: Optional[str] = license
 
     def keys(self) -> list[str]:
         """Get keys that allows conversion of this class to dictionary.
@@ -145,7 +152,7 @@ class Dataset(EntityDetail):
         """
         return ['tags', 'title', 'small_image_path', 'large_image_path',
                 'date', 'lead', 'content',
-                'data_entities', 'data_source', 'maintainer']
+                'data_entities', 'data_source', 'maintainer', 'license']
 
     def __getitem__(self, key):
         """Allows conversion of this class to dictionary.
@@ -153,3 +160,14 @@ class Dataset(EntityDetail):
         if key == 'date':
             return self.date.strftime(Config.time_format)
         return getattr(self, key)
+
+    @property
+    def extensions(self) -> Optional[set[str]]:
+        """Returns used file extensions"""
+        used_extensions: set[str] = set([_ext['extension']
+                                        for _ext in self.data_entities])
+        if None in used_extensions:
+            used_extensions.discard(None)
+        if len(used_extensions) == 0:
+            return None
+        return used_extensions

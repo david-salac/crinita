@@ -45,6 +45,12 @@
             {{ maintainer }}
         {% endif %}
 
+
+        {% if license %}
+            <h2>License</h2>
+            {{ license }}
+        {% endif %}
+
         {% if tags %}
             <span class="tag-cloud">❋ Tags:
                 {% for tag in tags -%}

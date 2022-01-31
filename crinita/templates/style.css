@@ -306,6 +306,15 @@ figure img {
     float: right;
 }
 
+.file_extensions {
+}
+.file_extension {
+    padding: 5px 8px 5px 8px;
+    margin: 0 5px 0 0;
+    background: #3eb3b6;
+    color: white;
+}
+
 @media only screen and (max-width: 1000px) {
   nav {
     position: relative;

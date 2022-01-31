@@ -7,6 +7,9 @@
         {% set date = entity_prev['date'] %}
         {% set small_image_path = entity_prev.small_image_path %}
         {% set lead = entity_prev.lead %}
+        {% if entity_prev.extensions %}
+            {% set extensions = entity_prev.extensions %}
+        {% endif %}
         {% include "dataset_preview.jnj" %}
     {% endfor %}
 {% endif %}

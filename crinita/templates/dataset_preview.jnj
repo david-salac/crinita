@@ -14,6 +14,14 @@
         <div class="readmore">
             <a href="{{ url }}">Detail</a>
         </div>
+        {% if extensions %}
+            <div class="file_extensions">
+                {% for f_ext in extensions %}
+                    <span class="file_extension">{{ f_ext }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
+
 </article>
 <div class="separator"></div>
