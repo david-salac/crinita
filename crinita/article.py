@@ -82,7 +82,8 @@ class Article(EntityDetail):
         Returns:
             list[str]: List of the keys to be passed to template.
         """
-        return ['tags', 'title', 'large_image_path', 'date', 'lead', 'content']
+        return ['tags', 'title', 'small_image_path', 'large_image_path',
+                'date', 'lead', 'content']
 
     def __getitem__(self, key):
         """Allows conversion of this class to dictionary.

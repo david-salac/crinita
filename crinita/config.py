@@ -17,6 +17,8 @@ class Config(object):
         default_page_template (str): Default template for the page.
         default_article_template (str): Default template for the article.
         default_dataset_template (str): Default template for the dataset.
+        default_dataset_list_template (str): Default template for dataset
+            listing and pagination.
         maximal_tag_cloud_size (int): Maximal number of elements in tag cloud.
         default_tag_cloud_template (str): Template to generate tag cloud.
         default_menu_template (str): Template for the menu.
@@ -57,6 +59,12 @@ class Config(object):
         tag_url_prefix (str): Prefix for tag URLs.
         template_parameters (dict[str, Any]): Global additional template
             engine parameters.
+        blog_url (Optional[str]): default URL for blog page (if None,
+            not generated).
+        blog_title (str): Title of dedicated blog page.
+        dataset_url (Optional[str]): default URL for blog page (if None,
+            not generated).
+        dataset_title (str): Title of dedicated blog page.
     """
     # Path to the templates
     templates_path: Path = Path(Path(__file__).parent, 'templates')
@@ -77,6 +85,9 @@ class Config(object):
 
     # Template to page
     default_dataset_template: str = "dataset.jnj"
+
+    # List template
+    default_dataset_list_template: str = "dataset_list.jnj"
 
     # Template to article list
     default_article_list_template: str = "article_list.jnj"
@@ -136,7 +147,7 @@ class Config(object):
     append_to_menu: tuple[dict[str, str | int]] = (
         {
             "title": "HOME",
-            # Either __HOME_PAGE__, __BLOG__ or External Link
+            # Either __HOME_PAGE__, __BLOG__, or __DATASET__ or External Link
             "url": "__HOME_PAGE__",
             "menu_position": 0
         },
@@ -167,6 +178,10 @@ Sitemap: sitemap.xml"""
     # URL for blog page (if referenced directly in menu)
     blog_url: Optional[str] = "blog"  # Of None, nothing is generated
     blog_title: str = "Blog"
+
+    # URL for dataset page (if referenced directly in menu)
+    dataset_url: Optional[str] = "catalogue"  # Of None, nothing is generated
+    dataset_title: str = "Data catalogue"
 
     template_parameters: dict[str, Any] = None
 

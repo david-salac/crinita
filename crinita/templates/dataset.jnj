@@ -18,7 +18,7 @@
                 {% for dataset in data_entities -%}
                     <div class="data-entity">
                         {% if dataset.icon %}
-                            <img src="file:///C://Users/admin/Pictures/excel.png" alt="icon" class="ds-icon">
+                            <img src="{{ dataset.icon }}" alt="icon" class="ds-icon">
                         {% endif %}
                         <a href="{{ dataset.data_link }}" class="ds-title">{{ dataset.title }}</a>
                         <a href="{{ dataset.data_link }}" class="ds-download">Download</a>

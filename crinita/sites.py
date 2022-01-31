@@ -1,7 +1,7 @@
 import json
 import copy
 import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass
@@ -13,10 +13,16 @@ from jinja2 import Environment, FileSystemLoader
 
 from .config import Config
 from .utils import Utils
-from .article import Article, Tag
+from .article import Article
+from .tag import Tag
+from .dataset import Dataset
 from .entity import Entity
 from .page import Page
 from .list_of_articles import ListOfArticles
+from .entity_list import EntityList
+from .entity_detail import EntityDetail
+from .list_of_datasets import ListOfDatasets
+from .dataset import DataEntity
 
 
 @dataclass()
@@ -106,8 +112,8 @@ class Sites(object):
         _list_of_articles: List of all articles ordered by date of publishing
             (from newest to oldest).
         _list_of_pages: List of all pages ordered by the position in menu.
-        _tag_to_incidence: List of tag in the system (ordered by incidence from
-            maximal to minimal).
+        _tag_to_articles_incidence: List of tag in the system (ordered by
+            incidence from maximal to minimal).
         _tag_to_articles: Mapping from tag to list of articles.
 
         tag_cloud_template (str): Template file for the tag cloud.
@@ -121,7 +127,7 @@ class Sites(object):
 
     def __init__(
         self,
-        list_of_entities: list[Article | Page], *,
+        list_of_entities: list[Article | Page | Dataset], *,
         check_url_unique: bool = True,
         layout_template: str | Path = "__DEFAULT__",
         tag_cloud_template: str = "__DEFAULT__",
@@ -142,12 +148,15 @@ class Sites(object):
             text_sections_in_right_menu_template (str): Template for the text
                section in right menu.
         """
-        # Separate Page and Article instances from all entities
+        # Separate Page, Datasets and Article instances from all entities
         list_of_articles: list[Article] = [
-            art for art in list_of_entities if isinstance(art, Article)
+            ent for ent in list_of_entities if isinstance(ent, Article)
+        ]
+        list_of_datasets: list[Dataset] = [
+            ent for ent in list_of_entities if isinstance(ent, Dataset)
         ]
         list_of_pages: list[Page] = [
-            art for art in list_of_entities if isinstance(art, Page)
+            ent for ent in list_of_entities if isinstance(ent, Page)
         ]
 
         self.tag_cloud_template: str = tag_cloud_template
@@ -157,36 +166,34 @@ class Sites(object):
             text_sections_in_right_menu_template
         self.layout_template: str | Path = layout_template
 
-        if check_url_unique:
-            # For sanity check (uniqueness of URLs)
-            all_urls: set[str] = set([])
-            number_of_elements: int = 0
+        # For checking of URL uniqueness
+        all_urls: set[str] = set([])
+        number_of_elements: int = 0
+
         # Process articles
         self._list_of_articles: list[Article] = sorted(list_of_articles,
                                                        key=lambda x: x.date,
                                                        reverse=True)
-        self._tag_to_articles: dict[Tag, list[Article]] = defaultdict(list)
-        self._tag_to_incidence: dict[Tag, int] = defaultdict(int)
-        for article in list_of_articles:
-            if check_url_unique:
-                # Add url to set (for sanity check)
-                all_urls.add(article.url_alias)
-                number_of_elements += 1
-            # Handle tags
-            for tag in article.tags:
-                self._tag_to_articles[tag].append(article)
-                self._tag_to_incidence[tag] += 1
-        # Sort articles in tag by date of publishing
-        for tag in self.list_of_tags:
-            self._tag_to_articles[tag] = sorted(self._tag_to_articles[tag],
-                                                key=lambda x: x.date,
-                                                reverse=True)
-        # Sort dictionary by values from the biggest to lowest
-        self._tag_to_incidence = {
-            k: v for k, v in sorted(self._tag_to_incidence.items(),
-                                    key=lambda item: item[1],
-                                    reverse=True)
-        }
+        _article_tag_to_articles, _article_tag_to_incidence, _articles_urls = \
+            self._process_entity_list(self._list_of_articles)
+        self._tag_to_articles = _article_tag_to_articles
+        self._tag_to_articles_incidence = _article_tag_to_incidence
+        if check_url_unique:
+            all_urls |= set(_articles_urls)
+            number_of_elements += len(_articles_urls)
+
+        # Process datasets
+        self._list_of_datasets: list[Dataset] = sorted(list_of_datasets,
+                                                       key=lambda x: x.date,
+                                                       reverse=True)
+        _dataset_tag_to_articles, _dataset_tag_to_incidence, _dataset_urls = \
+            self._process_entity_list(self._list_of_datasets)
+        self._tag_to_datasets = _dataset_tag_to_articles
+        self._tag_to_datasets_incidence = _dataset_tag_to_incidence
+        if check_url_unique:
+            all_urls |= set(_dataset_urls)
+            number_of_elements += len(_dataset_urls)
+
         # Process pages
         self._list_of_pages: list[Page] = sorted(
             list_of_pages,
@@ -204,8 +211,49 @@ class Sites(object):
         self._site_map_urls: list[str] = []
         self._homepage: Entity = None
 
+    @staticmethod
+    def _process_entity_list(
+        list_of_entities: list[Dataset | Article]) -> tuple[
+            dict[Tag, list[EntityDetail]], dict[Tag, int], list[str]
+    ]:
+        """Initiate entity list
+        Args:
+            list_of_entities (list[Dataset | Article]): List of entities
+                that are processed.
+        Returns:
+            tuple[dict[Tag, list[EntityDetail]], dict[Tag, int], list[str]]:
+                first entity is mapping from tag to ordered list of entities,
+                second is mapping from tag to count of entities,
+                third is the list of all URLs
+        """
+
+        _tag_to_entity: dict[Tag, list[EntityDetail]] = defaultdict(list)
+        _tag_to_entity_incidence: dict[Tag, int] = defaultdict(int)
+        _all_urls: list[str] = list()
+        for entity in list_of_entities:
+            # Add url to set (for sanity check)
+            _all_urls.append(entity.url_alias)
+
+            # Handle tags
+            for tag in entity.tags:
+                _tag_to_entity[tag].append(entity)
+                _tag_to_entity_incidence[tag] += 1
+
+        # Sort articles in tag by date of publishing
+        for tag in _tag_to_entity.keys():
+            _tag_to_entity[tag] = sorted(_tag_to_entity[tag],
+                                         key=lambda x: x.date,
+                                         reverse=True)
+        # Sort dictionary by values from the biggest to lowest
+        _tag_to_entity_incidence = {
+            k: v for k, v in sorted(_tag_to_entity_incidence.items(),
+                                    key=lambda item: item[1],
+                                    reverse=True)
+        }
+        return _tag_to_entity, _tag_to_entity_incidence, _all_urls
+
     @lru_cache()
-    def generate_tag_cloud(self) -> str:
+    def generate_article_tag_cloud(self) -> str:
         """Generate the tag cloud.
 
         Returns:
@@ -220,8 +268,8 @@ class Sites(object):
                 loader=FileSystemLoader(Config.templates_path)
             ).from_string(tem_han.read())
             html_str = template.render(
-                tags=self.list_of_tags[:min(Config.maximal_tag_cloud_size,
-                                            len(self.list_of_tags))]
+                tags=self.list_article_tags[:min(Config.maximal_tag_cloud_size,
+                                                 len(self.list_article_tags))]
             )
             return html_str
 
@@ -251,6 +299,8 @@ class Sites(object):
                 item.url = Config.site_home_url
             if item.url == "__BLOG__":
                 item.url = Utils.generate_file_path(Config.blog_url)
+            if item.url == "__DATASET__":
+                item.url = Utils.generate_file_path(Config.dataset_url)
             external_items.append(item)
         all_items_in_menu: list = self.list_of_pages_in_menu + external_items
 
@@ -311,7 +361,7 @@ class Sites(object):
 
     def _generate_entity(
         self,
-        page_entity: Article | Page,
+        page_entity: Article | Dataset | Page,
         output_directory_path: Path,
         rewrite_if_exists: bool
     ) -> None:
@@ -352,19 +402,22 @@ class Sites(object):
             meta_keywords=page_entity.keywords,
             menu=self.generate_menu(),
             recent_posts=self.generate_recent_posts(),
-            tag_cloud=self.generate_tag_cloud(),
+            tag_cloud=self.generate_article_tag_cloud(),
             text_section_in_right_menu=self.generate_text_sections_in_right_menu()  # noqa: E501
         ).write_to_file(target_file, layout_template)
 
         # Append to site map
         self._site_map_urls.append(page_entity.url)
 
-    def _generate_list_of_articles_with_pagination(
+    def _generate_list_of_entities_with_pagination(
         self,
         tag: Optional[Tag],
         output_directory_path: Path,
-        rewrite_if_exists: bool, *,
-        list_page: Optional[ListOfArticles] = None
+        rewrite_if_exists: bool,
+        list_type: type[EntityList],
+        *,
+        list_page: Optional[EntityList] = None,
+        tag_to_entities: Optional[dict[Tag, list[EntityDetail]]] = None
     ) -> None:
         """Generate all files related to the concrete tag in the system.
 
@@ -374,13 +427,17 @@ class Sites(object):
                 generated.
             rewrite_if_exists (bool): If True, files are rewritten; if False,
                 exception is raised.
+            list_type (type[EntityList]): Class defining entity list.
             list_page (Optional[ListOfArticles]): Entity that is used for
                 pagination (if None, new entity is created from the tag).
+            tag_to_entities (Optional[dict[Tag, list[EntityDetail]]]): Mapping
+                from tag to concrete entities (ordered as wanted). Applies
+                only if 'list_page' argument is None.
         """
         if list_page is None:
-            list_page: ListOfArticles = ListOfArticles(
+            list_page: list_type = list_type(
                 title=tag.name,
-                list_of_articles=self.tag_to_articles[tag],
+                list_of_entities=tag_to_entities[tag],
                 url_alias=tag.url_alias_with_prefix
             )
         # Parse layout template
@@ -407,7 +464,7 @@ class Sites(object):
                 meta_keywords=list_page.keywords,
                 menu=self.generate_menu(),
                 recent_posts=self.generate_recent_posts(),
-                tag_cloud=self.generate_tag_cloud(),
+                tag_cloud=self.generate_article_tag_cloud(),
                 text_section_in_right_menu=self.generate_text_sections_in_right_menu()  # noqa: E501
             ).write_to_file(target_file, layout_template)
 
@@ -452,26 +509,68 @@ class Sites(object):
                 rewrite_if_exists=rewrite_if_exists
             )
 
-        # Generate all pagination of articles
+        # Generate all datasets
+        for dataset in self.list_of_datasets:
+            self._generate_entity(
+                page_entity=dataset,
+                output_directory_path=output_directory_path,
+                rewrite_if_exists=rewrite_if_exists
+            )
+
+        # Generate all pages related to pagination of articles
         if isinstance(self.homepage, ListOfArticles):
-            self._generate_list_of_articles_with_pagination(
+            self._generate_list_of_entities_with_pagination(
                 tag=None,
                 output_directory_path=output_directory_path,
                 rewrite_if_exists=rewrite_if_exists,
-                list_page=self.homepage
+                list_type=ListOfArticles,
+                list_page=self.homepage,
+                tag_to_entities=self.tag_to_articles
             )
-        for tag in self.list_of_tags:
-            self._generate_list_of_articles_with_pagination(
+        for tag in self.list_article_tags:
+            self._generate_list_of_entities_with_pagination(
                 tag=tag,
                 output_directory_path=output_directory_path,
+                list_type=ListOfArticles,
                 rewrite_if_exists=rewrite_if_exists,
+                tag_to_entities=self.tag_to_articles
             )
         if Config.blog_url:
-            self._generate_list_of_articles_with_pagination(
+            self._generate_list_of_entities_with_pagination(
+                tag=None,
+                output_directory_path=output_directory_path,
+                list_type=ListOfArticles,
+                rewrite_if_exists=rewrite_if_exists,
+                list_page=self.generate_blog(Config.blog_title,
+                                             Config.blog_url)
+            )
+
+        # Generate all pages related to pagination of datasets
+        if isinstance(self.homepage, ListOfDatasets):
+            self._generate_list_of_entities_with_pagination(
                 tag=None,
                 output_directory_path=output_directory_path,
                 rewrite_if_exists=rewrite_if_exists,
-                list_page=self.generate_blog(Config.blog_title, Config.blog_url)
+                list_type=ListOfDatasets,
+                list_page=self.homepage,
+                tag_to_entities=self.tag_to_datasets
+            )
+        for tag in self.list_dataset_tags:
+            self._generate_list_of_entities_with_pagination(
+                tag=tag,
+                output_directory_path=output_directory_path,
+                list_type=ListOfDatasets,
+                rewrite_if_exists=rewrite_if_exists,
+                tag_to_entities=self.tag_to_datasets
+            )
+        if Config.dataset_url:
+            self._generate_list_of_entities_with_pagination(
+                tag=None,
+                output_directory_path=output_directory_path,
+                list_type=ListOfDatasets,
+                rewrite_if_exists=rewrite_if_exists,
+                list_page=self.generate_datasets(Config.dataset_title,
+                                                 Config.dataset_url)
             )
 
         # Generate all pages
@@ -517,6 +616,10 @@ class Sites(object):
         return self._list_of_articles
 
     @property
+    def list_of_datasets(self):  # Ordered by date
+        return self._list_of_datasets
+
+    @property
     def list_of_pages(self):  # Ordered by date
         return self._list_of_pages
 
@@ -529,16 +632,27 @@ class Sites(object):
         return []
 
     @property
-    def list_of_tags(self):  # Ordered by incidence
-        return list(self._tag_to_incidence.keys())
+    def list_article_tags(self) -> list[Tag]:
+        """List of tags related to article"""
+        return list(self._tag_to_articles_incidence.keys())
 
     @property
-    def tags_with_incidences(self):  # Ordered by incidence
-        return self._tag_to_incidence
+    def list_dataset_tags(self) -> list[Tag]:
+        """List of tags related to datasets"""
+        return list(self._tag_to_datasets_incidence.keys())
+
+    @property
+    def article_tags_with_incidences(self) -> dict[Tag, int]:
+        """Dictionary key is ordered by incidence"""
+        return self._tag_to_articles_incidence
 
     @property
     def tag_to_articles(self):  # Ordered by date
         return self._tag_to_articles
+
+    @property
+    def tag_to_datasets(self):  # Ordered by date
+        return self._tag_to_datasets
 
     @property
     @lru_cache()
@@ -564,6 +678,13 @@ class Sites(object):
                 if homepage_ent is not None:
                     raise ValueError("there are (at least) two homepages")
                 homepage_ent = article
+
+        # Run through all articles:
+        for dataset in self.list_of_datasets:
+            if dataset.url_alias is None:
+                if homepage_ent is not None:
+                    raise ValueError("there are (at least) two homepages")
+                homepage_ent = dataset
 
         # If there is no explicit homepage, generate as a list of all articles
         if homepage_ent is None:
@@ -592,7 +713,24 @@ class Sites(object):
         """
         return ListOfArticles(
             title=title,
-            list_of_articles=self.list_of_articles,
+            list_of_entities=self.list_of_articles,
+            url_alias=url_alias
+        )
+
+    @lru_cache()
+    def generate_datasets(self,
+                          title: Optional[str],
+                          url_alias: Optional[str]) -> ListOfDatasets:
+        """Generate data catalogue (list of datasets without tag).
+        Args:
+            title (Optional[str]): Title of the page.
+            url_alias (Optional[str]): URL prefix for page.
+        Return:
+            ListOfDatasets: Dataset entities.
+        """
+        return ListOfDatasets(
+            title=title,
+            list_of_entities=self.list_of_datasets,
             url_alias=url_alias
         )
 
@@ -625,6 +763,22 @@ class Sites(object):
             date = datetime.datetime.strptime(deserialized.pop('date'),
                                               "%Y-%m-%dT%H:%M:%S")
             return Article(**deserialized, tags=tags, date=date)
+        elif type_obj == Dataset.__name__:
+            # Extract tags
+            tags_def = deserialized.pop('tags')
+            tags = []
+            for tag_dict in tags_def:
+                tags.append(Tag(**tag_dict))
+            # Extract data entities
+            data_entities_def = deserialized.pop('data_entities')
+            data_entities = []
+            for data_entity_dict in data_entities_def:
+                data_entities.append(DataEntity(**data_entity_dict))
+            # Extract date:
+            date = datetime.datetime.strptime(deserialized.pop('date'),
+                                              "%Y-%m-%dT%H:%M:%S")
+            return Dataset(**deserialized, tags=tags, date=date,
+                           data_entities=data_entities)
 
         raise ValueError("Unsupported type of object")
 
@@ -645,6 +799,8 @@ class Sites(object):
             all_entities.append(json.loads(page.json))
         for article in self._list_of_articles:
             all_entities.append(json.loads(article.json))
+        for data_entity in self._list_of_datasets:
+            all_entities.append(json.loads(data_entity.json))
         json_def['list_of_entities'] = all_entities
         # Serialize result
         return json.dumps(json_def, cls=self.JSON_ENCODER)

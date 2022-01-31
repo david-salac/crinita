@@ -25,6 +25,29 @@ class DataEntity(object):
     license: Optional[str] = None
     icon: Optional[str] = None
 
+    def keys(self) -> list[str]:
+        """Get keys that allows conversion of this class to dictionary.
+
+        Returns:
+            list[str]: List of the keys.
+        """
+        return ['title', 'data_link', 'description', 'license', 'icon']
+
+    def __getitem__(self, key):
+        """Allows conversion of this class to dictionary.
+        """
+        return getattr(self, key)
+
+
+class JSONEncoderWithTagsAndDataEntities(JSONEncoderWithTags):
+    """Allow to serialize data entities"""
+    def default(self, o: Any) -> Any:
+        if isinstance(o, DataEntity):
+            return dict(o)
+        elif isinstance(o, (datetime.date, datetime.datetime)):
+            return o.isoformat()
+        return super().default(o)
+
 
 class Dataset(EntityDetail):
     """Represents a single dataset entity.
@@ -42,7 +65,7 @@ class Dataset(EntityDetail):
         data_source (Optional[str]): Source and info about data origin.
         maintainer (Optional[str]): Info and contact about data maintainer.
     """
-    JSON_ENCODER = JSONEncoderWithTags
+    JSON_ENCODER = JSONEncoderWithTagsAndDataEntities
 
     def __init__(
         self,
@@ -91,7 +114,7 @@ class Dataset(EntityDetail):
             maintainer (Optional[str]): Info and contact about data maintainer.
         """
         if template == "__DEFAULT__":
-            template = Config.default_article_template
+            template = Config.default_dataset_template
 
         # Call the entity constructor to pass meta tags
         if keywords is None and len(tags) > 0:
@@ -120,7 +143,8 @@ class Dataset(EntityDetail):
         Returns:
             list[str]: List of the keys to be passed to template.
         """
-        return ['tags', 'title', 'large_image_path', 'date', 'lead', 'content',
+        return ['tags', 'title', 'small_image_path', 'large_image_path',
+                'date', 'lead', 'content',
                 'data_entities', 'data_source', 'maintainer']
 
     def __getitem__(self, key):
