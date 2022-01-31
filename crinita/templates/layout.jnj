@@ -26,7 +26,9 @@
 
                 <aside>
                     {{ recent_posts }}
-                    {{ tag_cloud }}
+                    {{ recent_datasets }}
+                    {{ article_tag_cloud }}
+                    {{ dataset_tag_cloud }}
                     {{ text_section_in_right_menu }}
                 </aside>
                 <div class="clear"></div>

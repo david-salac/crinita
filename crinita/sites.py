@@ -1,7 +1,7 @@
 import json
 import copy
 import datetime
-from typing import Optional, TYPE_CHECKING
+from typing import Optional
 from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass
@@ -33,7 +33,9 @@ class _SinglePageHTML(object):
     menu: str
     page_content: str
     recent_posts: str
-    tag_cloud: str
+    recent_datasets: str
+    article_tag_cloud: str
+    dataset_tag_cloud: str
     text_section_in_right_menu: str
     meta_description: str = None
     meta_keywords: str = None
@@ -115,8 +117,10 @@ class Sites(object):
         _tag_to_articles_incidence: List of tag in the system (ordered by
             incidence from maximal to minimal).
         _tag_to_articles: Mapping from tag to list of articles.
-
-        tag_cloud_template (str): Template file for the tag cloud.
+        article_tag_cloud_template (str): Template file for the article's tag
+            cloud.
+        dataset_tag_cloud_template (str): Template file for the dataset's tag
+            cloud.
         menu_template (str): Template file for the menu.
         recent_posts_template (str): Template file for the recent posts.
         _site_map_urls (list[str]): List of all URLs in the app
@@ -130,9 +134,11 @@ class Sites(object):
         list_of_entities: list[Article | Page | Dataset], *,
         check_url_unique: bool = True,
         layout_template: str | Path = "__DEFAULT__",
-        tag_cloud_template: str = "__DEFAULT__",
+        article_tag_cloud_template: str = "__DEFAULT__",
+        dataset_tag_cloud_template: str = "__DEFAULT__",
         menu_template: str = "__DEFAULT__",
         recent_posts_template: str = "__DEFAULT__",
+        recent_datasets_template: str = "__DEFAULT__",
         text_sections_in_right_menu_template: str = "__DEFAULT__"
     ):
         """Create a new sites
@@ -142,9 +148,13 @@ class Sites(object):
                and articles to be included.
             check_url_unique (bool): If True, uniqueness of URLs is checked.
             layout_template (str | Path): Template file for the whole sites.
-            tag_cloud_template (str): Template file for the tag cloud.
+            article_tag_cloud_template (str): Template file for the article's
+                tag cloud.
+            dataset_tag_cloud_template (str): Template file for the dataset's
+                tag cloud.
             menu_template (str): Template file for the menu.
-            recent_posts_template (str): Template file for the recent posts.
+            recent_posts_template (str): Template file for recent posts.
+            recent_datasets_template (str): Template file for recent datasets.
             text_sections_in_right_menu_template (str): Template for the text
                section in right menu.
         """
@@ -159,9 +169,11 @@ class Sites(object):
             ent for ent in list_of_entities if isinstance(ent, Page)
         ]
 
-        self.tag_cloud_template: str = tag_cloud_template
+        self.article_tag_cloud_template: str = article_tag_cloud_template
+        self.dataset_tag_cloud_template: str = dataset_tag_cloud_template
         self.menu_template: str = menu_template
         self.recent_posts_template: str = recent_posts_template
+        self.recent_datasets_template: str = recent_datasets_template
         self.text_sections_in_right_menu_template: str = \
             text_sections_in_right_menu_template
         self.layout_template: str | Path = layout_template
@@ -254,22 +266,49 @@ class Sites(object):
 
     @lru_cache()
     def generate_article_tag_cloud(self) -> str:
-        """Generate the tag cloud.
+        """Generate the article's tag cloud.
 
         Returns:
             str: HTML code for the tag cloud.
         """
-        template = self.tag_cloud_template
+        template = self.article_tag_cloud_template
         if template == "__DEFAULT__":
-            template = Config.default_tag_cloud_template
+            template = Config.default_article_tag_cloud_template
         # Generate HTML code
         with open(Config.templates_path.joinpath(template)) as tem_han:
             template = Environment(
                 loader=FileSystemLoader(Config.templates_path)
             ).from_string(tem_han.read())
             html_str = template.render(
-                tags=self.list_article_tags[:min(Config.maximal_tag_cloud_size,
-                                                 len(self.list_article_tags))]
+                tags=self.list_article_tags[
+                     :min(Config.maximal_article_tag_cloud_size,
+                          len(self.list_article_tags))
+                     ],
+                tag_cloud_title=Config.title_article_tag_cloud
+            )
+            return html_str
+
+    @lru_cache()
+    def generate_dataset_tag_cloud(self) -> str:
+        """Generate the dataset's tag cloud.
+
+        Returns:
+            str: HTML code for the dataset's tag cloud.
+        """
+        template = self.dataset_tag_cloud_template
+        if template == "__DEFAULT__":
+            template = Config.default_dataset_tag_cloud_template
+        # Generate HTML code
+        with open(Config.templates_path.joinpath(template)) as tem_han:
+            template = Environment(
+                loader=FileSystemLoader(Config.templates_path)
+            ).from_string(tem_han.read())
+            html_str = template.render(
+                tags=self.list_dataset_tags[
+                     :min(Config.maximal_dataset_tag_cloud_size,
+                          len(self.list_dataset_tags))
+                     ],
+                tag_cloud_title=Config.title_dataset_tag_cloud
             )
             return html_str
 
@@ -326,16 +365,40 @@ class Sites(object):
         """
         template = self.recent_posts_template
         if template == "__DEFAULT__":
-            template = Config.default_recent_posts
+            template = Config.default_recent_posts_template
         # Generate HTML code
         with open(Config.templates_path.joinpath(template)) as tem_han:
             template = Environment(
                 loader=FileSystemLoader(Config.templates_path)
             ).from_string(tem_han.read())
             html_str = template.render(
-                recent_posts=self.list_of_articles[:min(
+                recent_elements=self.list_of_articles[:min(
                     len(self.list_of_articles), Config.maximal_recent_posts
-                )]
+                )],
+                recent_elements_title=Config.recent_posts_title
+            )
+            return html_str
+
+    @lru_cache()
+    def generate_recent_datasets(self) -> str:
+        """Generate the recent datasets tag.
+
+        Returns:
+            str: HTML code for the recent datasets tag.
+        """
+        template = self.recent_datasets_template
+        if template == "__DEFAULT__":
+            template = Config.default_recent_datasets_template
+        # Generate HTML code
+        with open(Config.templates_path.joinpath(template)) as tem_han:
+            template = Environment(
+                loader=FileSystemLoader(Config.templates_path)
+            ).from_string(tem_han.read())
+            html_str = template.render(
+                recent_elements=self.list_of_datasets[:min(
+                    len(self.list_of_datasets), Config.maximal_recent_datasets
+                )],
+                recent_elements_title=Config.recent_datasets_title
             )
             return html_str
 
@@ -402,7 +465,9 @@ class Sites(object):
             meta_keywords=page_entity.keywords,
             menu=self.generate_menu(),
             recent_posts=self.generate_recent_posts(),
-            tag_cloud=self.generate_article_tag_cloud(),
+            recent_datasets=self.generate_recent_datasets(),
+            article_tag_cloud=self.generate_article_tag_cloud(),
+            dataset_tag_cloud=self.generate_dataset_tag_cloud(),
             text_section_in_right_menu=self.generate_text_sections_in_right_menu()  # noqa: E501
         ).write_to_file(target_file, layout_template)
 
@@ -464,7 +529,9 @@ class Sites(object):
                 meta_keywords=list_page.keywords,
                 menu=self.generate_menu(),
                 recent_posts=self.generate_recent_posts(),
-                tag_cloud=self.generate_article_tag_cloud(),
+                recent_datasets=self.generate_recent_datasets(),
+                article_tag_cloud=self.generate_article_tag_cloud(),
+                dataset_tag_cloud=self.generate_dataset_tag_cloud(),
                 text_section_in_right_menu=self.generate_text_sections_in_right_menu()  # noqa: E501
             ).write_to_file(target_file, layout_template)
 

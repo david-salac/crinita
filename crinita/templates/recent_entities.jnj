@@ -1,0 +1,9 @@
+{% if recent_elements %}
+<h3>{{ recent_elements_title }}</h3>
+<div class="separator"></div>
+<ul>
+    {% for recent_element in recent_elements %}
+        <li><a href="{{ recent_element.url }}">{{ recent_element.title }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}

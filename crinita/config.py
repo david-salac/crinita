@@ -19,11 +19,24 @@ class Config(object):
         default_dataset_template (str): Default template for the dataset.
         default_dataset_list_template (str): Default template for dataset
             listing and pagination.
-        maximal_tag_cloud_size (int): Maximal number of elements in tag cloud.
-        default_tag_cloud_template (str): Template to generate tag cloud.
+        maximal_article_tag_cloud_size (int): Maximal number of elements in
+            articles tag cloud.
+        default_article_tag_cloud_template (str): Template to generate article
+            tag cloud.
+        title_article_tag_cloud (str): Title of article's tag cloud
+        maximal_dataset_tag_cloud_size (int): Maximal number of elements in
+            dataset's tag cloud.
+        default_dataset_tag_cloud_template (str): Template to generate dataset
+            tag cloud.
+        title_dataset_tag_cloud (str): Title of dataset's tag cloud
         default_menu_template (str): Template for the menu.
-        default_recent_posts (str): Template for the recent posts.
+        default_recent_posts_template (str): Template for the recent posts.
         maximal_recent_posts (int): Maximal number of recent posts to show.
+        recent_posts_title (str): Title for recent posts tag.
+        default_recent_datasets_template (str): Template for recent datasets.
+        maximal_recent_datasets (int): Maximal number of recent
+            datasets to show.
+        recent_datasets_title (str): Title for recent datasets tag.
         site_title (str): Name of sites (tag title in the tag head).
         site_logo_text (str): Text for the site logo.
         site_title_separator (str): Separator for specific page for the title
@@ -92,16 +105,28 @@ class Config(object):
     # Template to article list
     default_article_list_template: str = "article_list.jnj"
 
-    # Tag cloud configuration
-    maximal_tag_cloud_size: int = 5
-    default_tag_cloud_template: str = "tag_cloud.jnj"
+    # Article tag cloud configuration
+    maximal_article_tag_cloud_size: int = 5
+    default_article_tag_cloud_template: str = "tag_cloud.jnj"
+    title_article_tag_cloud: str = "Article tag cloud"
+
+    # Dataset tag cloud configuration
+    maximal_dataset_tag_cloud_size: int = 5
+    default_dataset_tag_cloud_template: str = "tag_cloud.jnj"
+    title_dataset_tag_cloud: str = "Dataset tag cloud"
 
     # Menu configuration
     default_menu_template: str = "menu.jnj"
 
     # Recent posts configuration
-    default_recent_posts: str = "recent_posts.jnj"
+    default_recent_posts_template: str = "recent_entities.jnj"
     maximal_recent_posts: int = 5
+    recent_posts_title: str = "Recent posts"
+
+    # Recent datasets configuration
+    default_recent_datasets_template: str = "recent_entities.jnj"
+    maximal_recent_datasets: int = 5
+    recent_datasets_title: str = "Recent datasets"
 
     # Configuration of page title (tag title in head)
     site_title: str = "Some blog"
