@@ -37,6 +37,7 @@ class _SinglePageHTML(object):
     article_tag_cloud: str
     dataset_tag_cloud: str
     text_section_in_right_menu: str
+    page_name: Optional[str] = None,
     meta_description: str = None
     meta_keywords: str = None
     meta_author: str = None
@@ -456,6 +457,7 @@ class Sites(object):
                 page_entity.url_alias
             ),
             title=page_entity.page_title,
+            page_name=page_entity.page_name,
             # Additional (optional) parameters merged with global version
             template_parameters=Config.global_template_parameters | \
                                 page_entity.template_parameters,
@@ -523,6 +525,7 @@ class Sites(object):
             _SinglePageHTML(
                 page_content=list_page.generate_page(single_url),
                 title=list_page.page_title,
+                page_name=list_page.page_name,
 
                 # Generate blocks
                 meta_description=list_page.description,

@@ -96,6 +96,21 @@ class Entity(abc.ABC):
         )
 
     @property
+    def page_name(self) -> Optional[str]:
+        """Get page name.
+
+        Returns:
+            Optional[str]: Page name of None.
+        """
+        if self.title is None and self.url_alias is None:
+            # If the page is homepage and title is not set-up
+            return Config.site_title_homepage
+        elif self.title is None or len(self.title) == 0:
+            # If the title is not set-up, return just root title
+            return None
+        return self.title
+
+    @property
     def url(self):
         """Generate the URL leading to the file (with file suffix)"""
         return Utils.generate_file_path(self.url_alias)
