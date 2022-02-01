@@ -1,5 +1,5 @@
 {# List of the articles with pagination menu #}
-{% if page_position == 0 %}
+{% if page_position == 0 and entities_length >= 1 %}
     {% set url = entities[0].url %}
     {% set title = entities[0].title %}
     {% set date = entities[0]['date'] %}
