@@ -224,8 +224,16 @@ Sitemap: sitemap.xml"""
         Returns:
             str: JSON representation of Config class
         """
+        return json.dumps(cls.json)
+
+    @classmethod
+    @property
+    def json(cls) -> dict:
+        """Dictionary representation of the Config class"""
         json_def = {}
         for _var in vars(cls):
+            if _var == "json":
+                continue
             if _var.startswith("_"):
                 continue
             if callable(getattr(cls, _var)):
@@ -235,7 +243,7 @@ Sitemap: sitemap.xml"""
                 json_def[_var] = str(json_def[_var])
         # Serialize the object type name
         json_def['object_type'] = cls.__name__
-        return json.dumps(json_def)
+        return json_def
 
     @classmethod
     def from_json(cls, json_str: str) -> None:

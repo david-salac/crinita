@@ -3,20 +3,21 @@ Author: David Salac <https://www.github.com/david-salac>
 
 Project sites: [Crinita](https://crinita.com/)
 
-Python application for generating static websites like a blog or
-simple static pages. Creates HTML files based on inputs (without
-requiring to run any script languages on the server-side).
+Crinita is a Python application for generating static websites
+like blogs, data catalogues or simple static pages. It directly
+creates HTML files based on inputs (without requiring to run any script
+languages on the server-side).
 
 ## Blog and static website generator
 Generally speaking, Crinita is a static website generator. That is
 an application that generates simple HTML files that cover all the
 content of sites from all inputs - composed mainly of the
-definition of pages, articles and other entities on websites).
+definition of pages, articles, datasets and other entities on websites).
 So after running of static websites generator, you have a set of
 `*.html` files (including index.html) that allows you to browse sites.
 
 There are many advantages of using static websites generator rather
-than the standard approach using some web framework (like PHP,
+than the standard approach using some web frameworks (like PHP,
 Django). Mainly, the result can be simply deployed to production
 as you do not need to configure anything on the server-side. There
 are many ways how to deploy the outcome; the most popular is
@@ -29,10 +30,9 @@ cost-effectiveness - you do not need to use any expensive technologies
 for hosting (like AWS) or pay directly for these services (like Wix,
 Medium). 
 
-Crinita allows you to generate blog (and/or) websites (blog
-or just set of static pages). It includes advanced features like
-tags, the possibility to edit meta tags for each entity (article
-or page). Interface for using Crinita is simple so you can learn
+Crinita allows you to generate blog, data catalogues or simple website.
+It includes advanced features like tags, the possibility to edit meta tags
+for each entity. Interface for using Crinita is simple, so you can learn
 it quickly. Installation of Crinita is a simple task as it does not
 require any system dependencies.
 
