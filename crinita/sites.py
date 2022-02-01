@@ -92,7 +92,7 @@ class _SinglePageHTML(object):
             self.site_logo_text = Config.site_logo_text
         if self.homepage_link is None:
             self.homepage_link = Config.site_home_url
-        if self.css_style_path is None and Config.css_style_path.name:
+        if self.css_style_path is None and Config.css_style_path:
             self.css_style_path = Config.css_style_path.name
 
         with Config.templates_path.joinpath(
@@ -877,9 +877,25 @@ class Sites(object):
 
         Returns:
             str: JSON representation of sites
+        Note:
+            - Cannot directly call .dictionary property as some entities
+                require custom JSON encoders.
         """
+        json_def = {}
+        for _var in vars(self):
+            if not _var.startswith("_"):
+                json_def[_var] = getattr(self, _var)
+        # Serialize entities:
+        all_entities = []
+        for page in self._list_of_pages:
+            all_entities.append(json.loads(page.json))
+        for article in self._list_of_articles:
+            all_entities.append(json.loads(article.json))
+        for data_entity in self._list_of_datasets:
+            all_entities.append(json.loads(data_entity.json))
+        json_def['list_of_entities'] = all_entities
         # Serialize result
-        return json.dumps(self.dictionary, cls=self.JSON_ENCODER)
+        return json.dumps(json_def, cls=self.JSON_ENCODER)
 
     @classmethod
     def sites_from_json(cls, json_obj: str | dict) -> 'Sites':
