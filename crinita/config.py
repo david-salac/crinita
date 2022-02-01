@@ -12,7 +12,7 @@ class Config(classutilities.ClassPropertiesMixin):
         templates_path (Path): Path to the folder with templates.
         resources_path (Optional[Path]): Path to directory with resources. If
             set, the content of the directory is copied to output folder.
-        css_style_path (Path): Path to css styles
+        css_style_path (Optional[Path]): Path to css styles (for copying).
         default_layout_template (str): Default template file for websites.
         default_page_template (str): Default template for the page.
         default_article_template (str): Default template for the article.
@@ -84,8 +84,8 @@ class Config(classutilities.ClassPropertiesMixin):
     resources_path: Optional[Path] = None
 
     # Path to CSS styles
-    css_style_path: Path = Path(Path(__file__).parent,
-                                'templates', 'style.css')
+    css_style_path: Optional[Path] = Path(Path(__file__).parent,
+                                          'templates', 'style.css')
 
     # Template for whole sites
     default_layout_template: str = "layout.jnj"

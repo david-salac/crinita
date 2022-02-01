@@ -92,7 +92,7 @@ class _SinglePageHTML(object):
             self.site_logo_text = Config.site_logo_text
         if self.homepage_link is None:
             self.homepage_link = Config.site_home_url
-        if self.css_style_path is None:
+        if self.css_style_path is None and Config.css_style_path.name:
             self.css_style_path = Config.css_style_path.name
 
         with Config.templates_path.joinpath(
