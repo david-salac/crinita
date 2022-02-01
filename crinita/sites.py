@@ -802,19 +802,19 @@ class Sites(object):
         )
 
     @staticmethod
-    def object_from_json(json_str: str) -> Entity:
+    def object_from_json(json_def: str | dict) -> Entity:
         """Deserialize object (Page or Article) from JSON.
 
         Args:
-            json_str (str): JSON string defining object.
+            json_def (str): JSON string defining object or dictionary.
 
         Returns:
             Entity: Concrete object.
         """
-        if isinstance(json_str, str):
-            deserialized: dict = json.loads(json_str)
+        if isinstance(json_def, str):
+            deserialized: dict = json.loads(json_def)
         else:
-            deserialized: dict = copy.deepcopy(json_str)
+            deserialized: dict = copy.deepcopy(json_def)
 
         type_obj = deserialized.pop('object_type')
 
@@ -850,11 +850,11 @@ class Sites(object):
         raise ValueError("Unsupported type of object")
 
     @property
-    def json(self) -> str:
-        """Serialize sites to JSON
+    def dictionary(self) -> dict:
+        """Serialize sites to JSON serializable dictionary
 
         Returns:
-            str: JSON representation of sites
+            dict: JSON serializable dictionary representation of sites.
         """
         json_def = {}
         for _var in vars(self):
@@ -863,27 +863,37 @@ class Sites(object):
         # Serialize entities:
         all_entities = []
         for page in self._list_of_pages:
-            all_entities.append(json.loads(page.json))
+            all_entities.append(page.dictionary)
         for article in self._list_of_articles:
-            all_entities.append(json.loads(article.json))
+            all_entities.append(article.dictionary)
         for data_entity in self._list_of_datasets:
-            all_entities.append(json.loads(data_entity.json))
+            all_entities.append(data_entity.dictionary)
         json_def['list_of_entities'] = all_entities
+        return json_def
+
+    @property
+    def json(self) -> str:
+        """Serialize sites to JSON
+
+        Returns:
+            str: JSON representation of sites
+        """
         # Serialize result
-        return json.dumps(json_def, cls=self.JSON_ENCODER)
+        return json.dumps(self.dictionary, cls=self.JSON_ENCODER)
 
     @classmethod
-    def sites_from_json(cls, json_str: str) -> 'Sites':
+    def sites_from_json(cls, json_obj: str | dict) -> 'Sites':
         """Deserialize sites from JSON string.
         Args:
-            json_str (str): Input JSON string.
+            json_obj (str): Input JSON string or dictionary.
         Returns:
             Sites: new sites from JSON string.
         """
-        if isinstance(json_str, str):
-            deserialized: dict = json.loads(json_str)
+        if isinstance(json_obj, str):
+            deserialized: dict = json.loads(json_obj)
         else:
-            deserialized: dict = copy.deepcopy(json_str)
+            deserialized: dict = copy.deepcopy(json_obj)
+
         list_of_entities = deserialized.pop('list_of_entities')
         entities = []
         for entity_def in list_of_entities:

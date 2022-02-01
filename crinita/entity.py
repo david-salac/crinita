@@ -107,6 +107,16 @@ class Entity(abc.ABC):
         Returns:
             str: JSON definition
         """
+        return json.dumps(self.dictionary, cls=self.JSON_ENCODER)
+
+    @property
+    def dictionary(self) -> dict:
+        """Export entity to JSON serializable dictionary.
+
+        Returns:
+            dict: dictionary definition (JSON serializable).
+        """
+
         # Skip following variables:
         skip_variables = {'url_list'}
 
@@ -116,4 +126,4 @@ class Entity(abc.ABC):
                 json_def[_var] = getattr(self, _var)
         # Serialize the object type name
         json_def['object_type'] = type(self).__name__
-        return json.dumps(json_def, cls=self.JSON_ENCODER)
+        return json_def
