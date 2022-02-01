@@ -50,9 +50,9 @@ class Entity(abc.ABC):
         self.template: str = template
         self.description: Optional[str] = description
         self.keywords: Optional[str] = keywords
-        # if url_alias and parse.quote(url_alias) != url_alias.lower():
-        #     raise AttributeError("Only URL aliases without any special "
-        #                          "character are supported")
+        if url_alias and parse.quote(url_alias) != url_alias.lower():
+            raise AttributeError("Only URL aliases without any special "
+                                 "character are supported")
         self.url_alias: Optional[str] = url_alias
         self.title: Optional[str] = title
         if template_parameters:

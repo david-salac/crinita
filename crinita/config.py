@@ -1,11 +1,11 @@
 import json
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Any
 
+import classutilities
 
-@dataclass
-class Config(object):
+
+class Config(classutilities.ClassPropertiesMixin):
     """Configuration of the application.
 
     Attributes:
@@ -226,8 +226,7 @@ Sitemap: sitemap.xml"""
         """
         return json.dumps(cls.json)
 
-    @classmethod
-    @property
+    @classutilities.classproperty
     def json(cls) -> dict:
         """Dictionary representation of the Config class"""
         json_def = {}
@@ -245,15 +244,10 @@ Sitemap: sitemap.xml"""
         json_def['object_type'] = cls.__name__
         return json_def
 
-    @classmethod
-    def from_json(cls, json_str: str) -> None:
-        """Set-up class from JSON.
-
-        Args:
-            json_str (str): JSON definition of Config class.
-        """
-        objs: dict = json.loads(json_str)  # Deserialize JSON
-        object_type = objs.pop('object_type')
+    @json.setter
+    def json(cls, value: dict):
+        """Set configuration from dictionary"""
+        object_type = value.pop('object_type')
         if object_type != cls.__name__:
             raise ValueError(f"Value of object_type has to be {cls.__name__}")
 
@@ -262,7 +256,16 @@ Sitemap: sitemap.xml"""
             if isinstance(getattr(cls, _var), Path):
                 path_vars.add(_var)
 
-        for _key, _val in objs.items():
+        for _key, _val in value.items():
             setattr(cls, _key, _val)
             if _key in path_vars:
                 setattr(cls, _key, Path(_val))
+
+    @classmethod
+    def from_json(cls, json_str: str) -> None:
+        """Set-up class from JSON.
+
+        Args:
+            json_str (str): JSON definition of Config class.
+        """
+        cls.json = json.loads(json_str)  # Deserialize JSON
