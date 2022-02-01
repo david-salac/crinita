@@ -259,7 +259,10 @@ Sitemap: sitemap.xml"""
         for _key, _val in value.items():
             setattr(cls, _key, _val)
             if _key in path_vars:
-                setattr(cls, _key, Path(_val))
+                if _val is not None:
+                    setattr(cls, _key, Path(_val))
+                else:
+                    setattr(cls, _key, None)
 
     @classmethod
     def from_json(cls, json_str: str) -> None:
