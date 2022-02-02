@@ -3,7 +3,7 @@
 <div class="separator"></div>
 <ul class="tag-cloud">
     {% for tag in tags %}
-        <li><a href="{{ tag.url }} ">{{ tag.name }}</a></li>
+        <li><a href="{{ tag.url }}">{{ tag.name }}</a></li>
     {% endfor %}
 </ul>
 <div class="clear"></div>
