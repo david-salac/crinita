@@ -1,4 +1,4 @@
-{# Layout for the article detail #}
+{# Layout for the dataset detail #}
 <header>
     <h1>{{ title }}</h1>
     {% if date %}
