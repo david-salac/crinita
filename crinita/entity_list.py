@@ -28,7 +28,8 @@ class EntityList(Entity):
         template: str = '__DEFAULT__',
         description: Optional[str] = None,
         keywords: Optional[str] = None,
-        template_parameters: dict[str, Any] = None
+        template_parameters: dict[str, Any] = None,
+        additional_tags: Optional[dict[str, Any]] = None
     ):
         """Create the new blog post.
 
@@ -42,10 +43,13 @@ class EntityList(Entity):
                 considered for pagination.
             template_parameters (dict[str, Any]): All other additional
                 parameters that are passed to the template engine.
+            additional_tags (Optional[dict[str, Any]]): Definition of tags
+                that might be relevant for given scope.
         """
         # Call the entity constructor to pass meta tags
         super().__init__(template, title, description, keywords, url_alias,
-                         template_parameters=template_parameters)
+                         template_parameters=template_parameters,
+                         additional_tags=additional_tags)
 
         self.list_of_entities: list[EntityDetail] = list_of_entities
         self._set_url_list()  # set-up self.url_list
@@ -135,6 +139,7 @@ class EntityList(Entity):
                     **self.generate_pagination_nav_bar(page_position),
                     **self.generate_entities(page_position),
                     **template_parameters
-                }
+                },
+                additional_tags=self.additional_tags
             )
             return html_str

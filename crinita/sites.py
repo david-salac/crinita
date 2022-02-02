@@ -505,7 +505,13 @@ class Sites(object):
             list_page: list_type = list_type(
                 title=tag.name,
                 list_of_entities=tag_to_entities[tag],
-                url_alias=tag.url_alias_with_prefix
+                url_alias=tag.url_alias_with_prefix,
+                additional_tags={
+                    'article_tag_cloud': self.generate_article_tag_cloud(),
+                    'recent_posts': self.generate_recent_posts(),
+                    'dataset_tag_cloud': self.generate_dataset_tag_cloud(),
+                    'recent_datasets': self.generate_recent_datasets(),
+                }
             )
         # Parse layout template
         if self.layout_template == "__DEFAULT__":
@@ -784,7 +790,13 @@ class Sites(object):
         return ListOfArticles(
             title=title,
             list_of_entities=self.list_of_articles,
-            url_alias=url_alias
+            url_alias=url_alias,
+            additional_tags={
+                'article_tag_cloud': self.generate_article_tag_cloud(),
+                'recent_posts': self.generate_recent_posts(),
+                'dataset_tag_cloud': self.generate_dataset_tag_cloud(),
+                'recent_datasets': self.generate_recent_datasets(),
+            }
         )
 
     @lru_cache()
@@ -801,7 +813,13 @@ class Sites(object):
         return ListOfDatasets(
             title=title,
             list_of_entities=self.list_of_datasets,
-            url_alias=url_alias
+            url_alias=url_alias,
+            additional_tags={
+                'article_tag_cloud': self.generate_article_tag_cloud(),
+                'recent_posts': self.generate_recent_posts(),
+                'dataset_tag_cloud': self.generate_dataset_tag_cloud(),
+                'recent_datasets': self.generate_recent_datasets(),
+            }
         )
 
     @staticmethod

@@ -25,7 +25,8 @@ class Page(EntityDetail):
         template: str = '__DEFAULT__',
         description: Optional[str] = None,
         keywords: Optional[str] = None,
-        template_parameters: dict[str, Any] = None
+        template_parameters: dict[str, Any] = None,
+        additional_tags: Optional[dict[str, Any]] = None
     ):
         """Create the new blog post.
 
@@ -42,13 +43,16 @@ class Page(EntityDetail):
                 If None, page is not listed in menu.
             template_parameters (dict[str, Any]): All other additional
                 parameters that are passed to the template engine.
+            additional_tags (Optional[dict[str, Any]]): Definition of tags
+                that might be relevant for given scope.
         """
         if template == "__DEFAULT__":
             template = Config.default_page_template
 
         # Call the entity constructor to pass meta tags
         super().__init__(template, title, description, keywords, url_alias,
-                         template_parameters=template_parameters)
+                         template_parameters=template_parameters,
+                         additional_tags=additional_tags)
 
         self.large_image_path: str = large_image_path
         self.content: str = content

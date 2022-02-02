@@ -16,12 +16,14 @@ class EntityDetail(Entity):
         description: Optional[str],
         keywords: Optional[str],
         url_alias: str,
-        template_parameters: dict[str, Any] = None
+        template_parameters: dict[str, Any] = None,
+        additional_tags: Optional[dict[str, Any]] = None
     ):
         """Create the new blog post.
         """
         super().__init__(template, title, description, keywords, url_alias,
-                         template_parameters=template_parameters)
+                         template_parameters=template_parameters,
+                         additional_tags=additional_tags)
         self.url_list = [url_alias]
 
     def generate_page(self, url: str) -> str:
@@ -34,6 +36,7 @@ class EntityDetail(Entity):
                 loader=FileSystemLoader(Config.templates_path)
             ).from_string(tem_han.read())
             html_str = template.render(
-                **dict(self), **template_parameters
+                **dict(self), **template_parameters,
+                additional_tags=self.additional_tags
             )
             return html_str
