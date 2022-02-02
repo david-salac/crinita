@@ -454,7 +454,13 @@ class Sites(object):
         # Write content to file
         _SinglePageHTML(
             page_content=page_entity.generate_page(
-                page_entity.url_alias
+                page_entity.url_alias,
+                additional_tags={
+                    'article_tag_cloud': self.generate_article_tag_cloud(),
+                    'recent_posts': self.generate_recent_posts(),
+                    'dataset_tag_cloud': self.generate_dataset_tag_cloud(),
+                    'recent_datasets': self.generate_recent_datasets(),
+                }
             ),
             title=page_entity.page_title,
             page_name=page_entity.page_name,
@@ -505,13 +511,7 @@ class Sites(object):
             list_page: list_type = list_type(
                 title=tag.name,
                 list_of_entities=tag_to_entities[tag],
-                url_alias=tag.url_alias_with_prefix,
-                additional_tags={
-                    'article_tag_cloud': self.generate_article_tag_cloud(),
-                    'recent_posts': self.generate_recent_posts(),
-                    'dataset_tag_cloud': self.generate_dataset_tag_cloud(),
-                    'recent_datasets': self.generate_recent_datasets(),
-                }
+                url_alias=tag.url_alias_with_prefix
             )
         # Parse layout template
         if self.layout_template == "__DEFAULT__":
@@ -529,7 +529,15 @@ class Sites(object):
                 raise FileExistsError("this file already exists")
             # Write content to file
             _SinglePageHTML(
-                page_content=list_page.generate_page(single_url),
+                page_content=list_page.generate_page(
+                    single_url,
+                    additional_tags={
+                        'article_tag_cloud': self.generate_article_tag_cloud(),
+                        'recent_posts': self.generate_recent_posts(),
+                        'dataset_tag_cloud': self.generate_dataset_tag_cloud(),
+                        'recent_datasets': self.generate_recent_datasets(),
+                    }
+                ),
                 title=list_page.page_title,
                 page_name=list_page.page_name,
 
@@ -790,13 +798,7 @@ class Sites(object):
         return ListOfArticles(
             title=title,
             list_of_entities=self.list_of_articles,
-            url_alias=url_alias,
-            additional_tags={
-                'article_tag_cloud': self.generate_article_tag_cloud(),
-                'recent_posts': self.generate_recent_posts(),
-                'dataset_tag_cloud': self.generate_dataset_tag_cloud(),
-                'recent_datasets': self.generate_recent_datasets(),
-            }
+            url_alias=url_alias
         )
 
     @lru_cache()
@@ -813,13 +815,7 @@ class Sites(object):
         return ListOfDatasets(
             title=title,
             list_of_entities=self.list_of_datasets,
-            url_alias=url_alias,
-            additional_tags={
-                'article_tag_cloud': self.generate_article_tag_cloud(),
-                'recent_posts': self.generate_recent_posts(),
-                'dataset_tag_cloud': self.generate_dataset_tag_cloud(),
-                'recent_datasets': self.generate_recent_datasets(),
-            }
+            url_alias=url_alias
         )
 
     @staticmethod

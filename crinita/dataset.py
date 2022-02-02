@@ -90,8 +90,7 @@ class Dataset(EntityDetail):
         template: str = '__DEFAULT__',
         description: Optional[str] = None,
         keywords: Optional[str] = None,
-        template_parameters: dict[str, Any] = None,
-        additional_tags: Optional[dict[str, Any]] = None
+        template_parameters: dict[str, Any] = None
     ):
         """Create the new dataset.
 
@@ -119,8 +118,6 @@ class Dataset(EntityDetail):
             data_source (Optional[str]): Source and info about data origin.
             maintainer (Optional[str]): Info and contact about data maintainer.
             license (Optional[str]): License info.
-            additional_tags (Optional[dict[str, Any]]): Definition of tags
-                that might be relevant for given scope.
         """
         if template == "__DEFAULT__":
             template = Config.default_dataset_template
@@ -130,8 +127,7 @@ class Dataset(EntityDetail):
             keywords = ", ".join([single_tag.name for single_tag in tags])
 
         super().__init__(template, title, description, keywords, url_alias,
-                         template_parameters=template_parameters,
-                         additional_tags=additional_tags)
+                         template_parameters=template_parameters)
 
         self.tags: list[Tag] = tags
 

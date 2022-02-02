@@ -17,8 +17,7 @@ class ListOfArticles(EntityList):
         template: str = '__DEFAULT__',
         description: Optional[str] = None,
         keywords: Optional[str] = None,
-        template_parameters: dict[str, Any] = None,
-        additional_tags: Optional[dict[str, Any]] = None
+        template_parameters: dict[str, Any] = None
     ):
         """Create the new blog post.
 
@@ -32,13 +31,10 @@ class ListOfArticles(EntityList):
                 considered for pagination.
             template_parameters (dict[str, Any]): All other additional
                 parameters that are passed to the template engine.
-            additional_tags (Optional[dict[str, Any]]): Definition of tags
-                that might be relevant for given scope.
         """
         if template == "__DEFAULT__":
             template = Config.default_article_list_template
         # Call the entity constructor to pass meta tags
         super().__init__(title, list_of_entities, url_alias, template,
                          description, keywords,
-                         template_parameters=template_parameters,
-                         additional_tags=additional_tags)
+                         template_parameters=template_parameters)
