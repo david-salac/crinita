@@ -833,9 +833,7 @@ class Sites(object):
         else:
             deserialized: dict = copy.deepcopy(json_def)
 
-        type_obj = deserialized.pop('object_type')
-
-        match type_obj:
+        match deserialized.pop('object_type'):
             case Page.__name__:
                 return Page(**deserialized)
             case Article.__name__:
