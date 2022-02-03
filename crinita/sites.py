@@ -835,36 +835,36 @@ class Sites(object):
 
         type_obj = deserialized.pop('object_type')
 
-        if type_obj == Page.__name__:
-            return Page(**deserialized)
-        elif type_obj == Article.__name__:
-            # Extract tags
-            tags_def = deserialized.pop('tags')
-            tags = []
-            for tag_dict in tags_def:
-                tags.append(Tag(**tag_dict))
-            # Extract date:
-            date = datetime.datetime.strptime(deserialized.pop('date'),
-                                              "%Y-%m-%dT%H:%M:%S")
-            return Article(**deserialized, tags=tags, date=date)
-        elif type_obj == Dataset.__name__:
-            # Extract tags
-            tags_def = deserialized.pop('tags')
-            tags = []
-            for tag_dict in tags_def:
-                tags.append(Tag(**tag_dict))
-            # Extract data entities
-            data_entities_def = deserialized.pop('data_entities')
-            data_entities = []
-            for data_entity_dict in data_entities_def:
-                data_entities.append(DataEntity(**data_entity_dict))
-            # Extract date:
-            date = datetime.datetime.strptime(deserialized.pop('date'),
-                                              "%Y-%m-%dT%H:%M:%S")
-            return Dataset(**deserialized, tags=tags, date=date,
-                           data_entities=data_entities)
-
-        raise ValueError("Unsupported type of object")
+        match type_obj:
+            case Page.__name__:
+                return Page(**deserialized)
+            case Article.__name__:
+                tags_def = deserialized.pop('tags')
+                tags = []
+                for tag_dict in tags_def:
+                    tags.append(Tag(**tag_dict))
+                    # Extract date:
+                date = datetime.datetime.strptime(deserialized.pop('date'),
+                                                  "%Y-%m-%dT%H:%M:%S")
+                return Article(**deserialized, tags=tags, date=date)
+            case Dataset.__name__:
+                # Extract tags
+                tags_def = deserialized.pop('tags')
+                tags = []
+                for tag_dict in tags_def:
+                    tags.append(Tag(**tag_dict))
+                # Extract data entities
+                data_entities_def = deserialized.pop('data_entities')
+                data_entities = []
+                for data_entity_dict in data_entities_def:
+                    data_entities.append(DataEntity(**data_entity_dict))
+                # Extract date:
+                date = datetime.datetime.strptime(deserialized.pop('date'),
+                                                  "%Y-%m-%dT%H:%M:%S")
+                return Dataset(**deserialized, tags=tags, date=date,
+                               data_entities=data_entities)
+            case _:
+                raise ValueError("Unsupported type of object")
 
     @property
     def dictionary(self) -> dict:
