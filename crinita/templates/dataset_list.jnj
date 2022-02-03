@@ -1,0 +1,27 @@
+{# List of the datasets with pagination menu #}
+{% if entities_length >= 1 %}
+    {% set entities_slice = entities %}
+    {% for entity_prev in entities_slice %}
+        {% set url = entity_prev.url %}
+        {% set title = entity_prev.title %}
+        {% set date = entity_prev['date'] %}
+        {% set small_image_path = entity_prev.small_image_path %}
+        {% set lead = entity_prev.lead %}
+        {% if entity_prev.extensions %}
+            {% set extensions = entity_prev.extensions %}
+        {% endif %}
+        {% include "dataset_preview.jnj" %}
+    {% endfor %}
+{% endif %}
+
+{% if navigation_previous or navigation_next %}
+    <div class="navigation">
+        {% if navigation_previous %}
+            <a href="{{ navigation_previous }}" class="move-old">◀ &nbsp; Previous</a>
+        {% endif %}
+        {% if navigation_next %}
+            <a href="{{ navigation_next }}" class="move-new">Next &nbsp; ▶</a>
+        {% endif %}
+        <div class="clear"></div>
+    </div>
+{% endif %}

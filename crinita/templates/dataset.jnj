@@ -1,0 +1,62 @@
+{# Layout for the dataset detail #}
+<header>
+    <h1>{{ title }}</h1>
+    {% if date %}
+        <span class="date">★ Added on {{ date }}</span>
+    {% endif %}
+</header>
+<article>
+    {% if large_image_path %}
+        <div class="illustration" style="background-image: url('{{ large_image_path }}')"></div>
+    {% endif %}
+    <div class="content">
+        {{ content }}
+
+        {% if data_entities %}
+            <h2>Files and APIs</h2>
+            <div class="data-entities">
+                {% for dataset in data_entities -%}
+                    <div class="data-entity">
+                        {% if dataset.icon %}
+                            <img src="{{ dataset.icon }}" alt="icon" class="ds-icon">
+                        {% endif %}
+                        <a href="{{ dataset.data_link }}" class="ds-title">{{ dataset.title }}</a>
+                        <a href="{{ dataset.data_link }}" class="ds-download">Download</a>
+                        {% if dataset.description %}
+                            <div class="ds-description">
+                                {{ dataset.description }}
+                            </div>
+                        {% endif %}
+                        {% if dataset.license %}
+                            <p class="ds-license">{{ dataset.license }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if data_source %}
+            <h2>Data source</h2>
+            {{ data_source }}
+        {% endif %}
+
+        {% if maintainer %}
+            <h2>Maintainer</h2>
+            {{ maintainer }}
+        {% endif %}
+
+
+        {% if license %}
+            <h2>License</h2>
+            {{ license }}
+        {% endif %}
+
+        {% if tags %}
+            <span class="tag-cloud">❋ Tags:
+                {% for tag in tags -%}
+                    <a href="{{ tag.url }}">{{ tag.name }}</a>
+                {% endfor %}
+            </span>
+        {% endif %}
+    </div>
+</article>

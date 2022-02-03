@@ -1,20 +1,25 @@
 {# List of the articles with pagination menu #}
-{% if first_preview %}
-    {% set url = first_preview.url %}
-    {% set title = first_preview.title %}
-    {% set date = first_preview['date'] %}
-    {% set large_image_path = first_preview.large_image_path %}
-    {% set lead = first_preview.lead %}
+{% if page_position == 0 and entities_length >= 1 %}
+    {% set url = entities[0].url %}
+    {% set title = entities[0].title %}
+    {% set date = entities[0]['date'] %}
+    {% set large_image_path = entities[0].large_image_path %}
+    {% set lead = entities[0].lead %}
     {% include "article_first_preview.jnj" %}
 {% endif %}
 
-{% if article_previews %}
-    {% for article_preview in article_previews %}
-        {% set url = article_preview.url %}
-        {% set title = article_preview.title %}
-        {% set date = article_preview['date'] %}
-        {% set small_image_path = article_preview.small_image_path %}
-        {% set lead = article_preview.lead %}
+{% if entities_length > 1 %}
+    {% set entities_slice = entities %}
+    {# Remove dedicated items #}
+    {% if page_position == 0 %}
+        {% set entities_slice = entities[1:] %}
+    {% endif %}
+    {% for entity_prev in entities_slice %}
+        {% set url = entity_prev.url %}
+        {% set title = entity_prev.title %}
+        {% set date = entity_prev['date'] %}
+        {% set small_image_path = entity_prev.small_image_path %}
+        {% set lead = entity_prev.lead %}
         {% include "article_preview.jnj" %}
     {% endfor %}
 {% endif %}

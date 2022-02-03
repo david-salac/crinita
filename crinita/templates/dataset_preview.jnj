@@ -1,0 +1,27 @@
+{# Dataset preview in the list of datasets #}
+<header>
+    <a href="{{ url }}">{{ title }}</a>
+    {% if date %}
+        <span class="date">★ Added on {{ date }}</span>
+    {% endif %}
+</header>
+<article>
+    <div class="content">
+        {% if small_image_path %}
+            <div class="illustration" style="background-image: url('{{ small_image_path }}')"></div>
+        {% endif %}
+        {{ lead }}
+        <div class="readmore">
+            <a href="{{ url }}">Detail</a>
+        </div>
+        {% if extensions %}
+            <div class="file_extensions">
+                {% for f_ext in extensions %}
+                    <span class="file_extension">{{ f_ext }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+</article>
+<div class="separator"></div>

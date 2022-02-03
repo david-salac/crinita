@@ -1,0 +1,347 @@
+html, body {
+    margin: 0; padding: 0;
+    height: 100%;
+    font-size: 12pt;
+    box-sizing: border-box;
+    font-family: 'Ubuntu', sans-serif;
+    background-color: #faf9f5;
+}
+
+a {
+    text-decoration: none;
+    color: #444444;
+}
+a:hover {
+    color: black;
+}
+.clear {
+    clear: both;
+}
+
+#container {
+    margin: 0; padding: 0;
+    min-height: 100%;
+    position: relative;
+}
+footer {
+    padding: 0; margin: 0;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    z-index: 0;
+    height: 120px;
+    background: white;
+    text-align: center;
+}
+footer p {
+    margin-top: 20px;
+}
+footer a {
+    text-decoration: none;
+    color: #797979;
+}
+footer a:hover {
+    color: black;
+}
+#container > section {
+    box-sizing: border-box;
+    padding-left: 230px;
+    padding-bottom: 120px;
+    width: 98%;
+    max-width: 1220px;
+}
+
+#container > section > main {
+    box-sizing: border-box;
+    padding: 20px 0 20px 50px;
+    width: 100%;
+}
+
+/* Side menu (right) */
+#container > section > main > aside {
+    float: right;
+    width: 25%;
+}
+#container > section > main > aside > h3 {
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+#container > section > main > aside > ul.tag-cloud > li {
+    float: left;
+    display: inline-block;
+    margin: 0 10px 10px 0px;
+}
+#container > section > main > aside > ul.tag-cloud > li a {
+    display: inline-block;
+    border-radius: 5px;
+    padding: 5px 10px 5px 10px;
+    color: black;
+    background-color: #eeeeee;
+}
+#container > section > main > aside > ul.tag-cloud > li a:hover {
+    background-color: #e1e1e1;
+}
+#container > section > main > aside > h3:first-child {
+    margin-top: 0;
+}
+#container > section > main > aside .separator {
+    display: block;
+    border-bottom: 1px solid #a9a9a9;
+    margin-bottom: 10px;
+}
+#container > section > main > aside ul {
+    margin: 0; padding: 0;
+    list-style: none;
+}
+#container > section > main > aside ul li > a {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 0 8px 0;
+}
+/* Main page (articles canvas) */
+#container > section > main > #page-content {
+    width: 74%;
+    float: left;
+    box-sizing: border-box;
+    padding-right: 30px;
+}
+#container > section > main > #page-content > header > a {
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+    font-size: 150%;
+    display: block;
+    margin-bottom: 5px;
+}
+#container > section > main > #page-content > header > a:hover {
+    color: #3eb3b6;
+}
+#container > section > main > #page-content > header > .date {
+    color: #414141;
+    margin-bottom: 20px;
+    display: block;
+}
+#container > section > main > #page-content > article > .content > .tag-cloud {
+    border-top: 1px solid #a9a9a9;
+    padding: 20px 0 0 0;
+    margin-top: 20px;
+    display: block;
+}
+#container > section > main > #page-content > article > .content > .tag-cloud > a {
+    padding: 5px 10px 5px 10px;
+    margin: 0px 10px 10px 0px;
+    background: #eeeeee;
+    border-radius: 5px;
+    display: inline-block;
+    color: black;
+}
+#container > section > main > #page-content > article > .content > .tag-cloud > a:hover {
+    background: #e1e1e1;
+}
+
+#container > section > main > #page-content > article > .content  {
+    background: white;
+    box-sizing: border-box;
+    padding: 20px;
+    margin-bottom: 40px;
+    border-top: 5px solid #3eb3b6;
+}
+#container > section > main > #page-content > article:first-of-type > .illustration {
+    width: 100%;
+    height: 220px;
+    padding-bottom: 20px;
+    background-position: center center;
+    background-size: 100% auto;
+}
+#container > section > main > #page-content > article:first-of-type > .illustration {
+    width: 100%;
+    height: 220px;
+    padding-bottom: 20px;
+    background-position: center center;
+    background-size: 100% auto;
+}
+#container > section > main > #page-content > article > .content > .illustration {
+    width: 150px;
+    height: 150px;
+    background-position: center center;
+    float: left;
+    margin-right: 20px;
+}
+#container > section > main > #page-content > article > .content > .readmore {
+    clear: both;
+}
+#container > section > main > #page-content > article > .content > .readmore a {
+    font-size: 120%;
+    color: #3eb3b6;
+    text-transform: uppercase;
+    font-weight: bold;
+    text-align: right;
+    width: 100%;
+    display: block;
+}
+#container > section > main > #page-content > article > .content > .readmore a:hover {
+    color: black;
+}
+#container > section > main > #page-content > .separator {
+    width: 120%;
+    display: block;
+    border-bottom: 1px solid #a9a9a9;
+    margin-bottom: 40px;
+    margin-left: -20%;
+}
+
+#container > section > main > #page-content > .navigation {
+    margin-bottom: 20px;
+}
+#container > section > main > #page-content > .navigation > a {
+    color: black;
+    width: 49%;
+    display: block;
+}
+#container > section > main > #page-content > .navigation > a:hover {
+    color: #3eb3b6;
+}
+#container > section > main > #page-content > .navigation > .move-old {
+    float: left;
+}
+#container > section > main > #page-content > .navigation > .move-new {
+    float: right;
+    text-align: right;
+}
+
+/* Main navigation on left side */
+nav {
+    z-index: 1;
+    background: #01161e;
+    position: absolute;
+    left: 0;
+    width: 230px;
+    height: 100%;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    box-sizing: border-box;
+}
+nav #logo {
+    color: white;
+    text-decoration: none;
+    box-sizing: border-box;
+    padding: 30px 0px 30px 0px;
+    margin-bottom: 20px;
+    display: block;
+    font-size: 200%;
+    width: 100%;
+    border-bottom: 3px dotted #41423c;
+}
+nav #logo > #icon {
+    display: block;
+    width: 100px;
+    height: 100px;
+    margin: auto auto 15px auto;
+}
+nav ul, nav ul li {
+    list-style: none;
+    margin: 0; padding: 0;
+}
+nav ul {
+    padding-bottom: 20px;
+    border-bottom: 3px dotted #41423c;
+}
+nav ul li a {
+    display: block;
+    width: 100;
+    padding: 15px 0 15px 0;
+}
+nav ul li a {
+    color: white;
+    display: block;
+}
+nav ul li a:hover {
+    color: #8e8d7b;
+}
+
+pre, .code {
+    overflow: scroll;
+    box-sizing: border-box;
+    padding: 15px;
+    background: #f4f4f4
+}
+
+figure {
+    text-align: center;
+}
+figure img {
+    max-width: 100%;
+}
+
+.data-entities {
+}
+.data-entity {
+    margin-top: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #cecece;
+}
+.data-entity:first-child {
+    margin-top: 20px;
+}
+.data-entity:last-child {
+    margin-top: 20px;
+    border: none;
+}
+.data-entity .ds-icon {
+    max-width: 40px;
+    height: auto;
+    float: left;
+    margin-right: 15px;
+}
+.data-entity .ds-title {
+    font-size: 120%;
+}
+.data-entity .ds-download {
+    border: 1px solid #cecece;
+    padding: 10px;
+    margin: 0 0 10px 10px;
+    float: right;
+}
+
+.file_extensions {
+}
+.file_extension {
+    padding: 5px 8px 5px 8px;
+    margin: 0 5px 0 0;
+    background: #3eb3b6;
+    color: white;
+}
+
+@media only screen and (max-width: 1000px) {
+  nav {
+    position: relative;
+    width: 100%;
+  }
+  nav ul li {
+    display: inline-block;
+  }
+  nav ul li a {
+    display: inline-block;
+    padding: 10px 25px 10px 25px;
+  }
+  #container > section {
+    padding-left: 0px;
+    padding-bottom: 120px;
+    width: 98%;
+    max-width: 1220px;
+  }
+}
+@media only screen and (max-width: 750px) {
+    #container > section > main > aside {
+        float: none;
+        margin-top: 30px;
+        width: 100%;
+    }
+    #container > section > main > #page-content {
+        width: 100%;
+        float: none;
+    }
+}
