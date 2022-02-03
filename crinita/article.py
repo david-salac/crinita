@@ -38,11 +38,13 @@ class Article(EntityDetail):
         """Create the new blog post.
 
         Args:
-            template (str): Template that is used for the content generation.
+            template (str): A name of the file with Jinja2 template.
+                If __DEFAULT__, the default template from Config class is used.
             title (str): Name of the article.
-            description (Optional[str]): Description of the page (meta tag).
-            keywords (Optional[str]): Keywords of the page (meta tag), if None
-                values for tags are used.
+            description (Optional[str]): Description of the page (applies
+                in meta tag); If None, lead is used instead.
+            keywords (Optional[str]): Keywords related to the page (meta tag);
+                if None, tag names are used.
             url_alias (str): Alias for the page (like my-page).
             tags (list[Tag]): List of tags of the article.
 

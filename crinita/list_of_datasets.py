@@ -6,7 +6,7 @@ from .entity_list import EntityList
 
 
 class ListOfDatasets(EntityList):
-    """Generate the list of datasets with pagination.
+    """Generate the list of datasets (data catalogue) with pagination.
     """
 
     def __init__(

@@ -10,7 +10,7 @@ from .tag import Tag, JSONEncoderWithTags
 
 @dataclass
 class DataEntity(object):
-    """Represents a single data entity.
+    """Represents a single data entity in a dataset.
 
     Attributes:
         title (str): Name of the file (title)
@@ -43,7 +43,7 @@ class DataEntity(object):
 
 
 class JSONEncoderWithTagsAndDataEntities(JSONEncoderWithTags):
-    """Allow to serialize data entities"""
+    """Allow to serialize data entities to JSON"""
     def default(self, o: Any) -> Any:
         if isinstance(o, DataEntity):
             return dict(o)
@@ -53,7 +53,7 @@ class JSONEncoderWithTagsAndDataEntities(JSONEncoderWithTags):
 
 
 class Dataset(EntityDetail):
-    """Represents a single dataset entity.
+    """Represents a single dataset entity (an entity of data catalogue).
 
     Attributes:
         large_image_path (str): Path to the large image (background one).
@@ -64,7 +64,8 @@ class Dataset(EntityDetail):
         lead (str): Lead of the dataset.
         content (str): Content of the dataset.
 
-        data_entities (list[DataEntity]): Concrete data entities.
+        data_entities (list[DataEntity]): Concrete data entities contained in
+            a dataset (data catalogue item).
         data_source (Optional[str]): Source and info about data origin.
         maintainer (Optional[str]): Info and contact about data maintainer.
         license (Optional[str]): License info.
@@ -95,11 +96,13 @@ class Dataset(EntityDetail):
         """Create the new dataset.
 
         Args:
-            template (str): Template that is used for the content generation.
+            template (str): A name of the file with Jinja2 template.
+                If __DEFAULT__, the default template from Config class is used.
             title (str): Name of the dataset.
-            description (Optional[str]): Description of the page (meta tag).
-            keywords (Optional[str]): Keywords of the page (meta tag), if None
-                values for tags are used.
+            description (Optional[str]): Description of the page (applies
+                in meta tag); If None, lead is used instead.
+            keywords (Optional[str]): Keywords related to the page (meta tag);
+                if None, tag names are used.
             url_alias (str): Alias for the page (like my-page).
             tags (list[Tag]): List of tags of the dataset.
 
