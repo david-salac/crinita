@@ -29,7 +29,7 @@ setuptools.setup(
                 "requiring to run any script languages on the server-side).",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://crinita.com",
+    url="https://crinita.salispace.com",
     packages=setuptools.find_packages(),
     package_data={'': ['templates/*']},
     install_requires=crinita_requirements,

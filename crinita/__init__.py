@@ -8,5 +8,5 @@ from .list_of_articles import ListOfArticles  # noqa
 from .sites import Sites  # noqa
 
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __status__ = "Production"

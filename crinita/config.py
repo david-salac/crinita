@@ -159,7 +159,7 @@ class Config(classutilities.ClassPropertiesMixin):
     text_sections_in_right_menu: tuple[dict[str, str]] = (
         {
             "header": "About",
-            "content": 'Generated using <a href="http://www.crinita.com/">Crinita</a>.'  # noqa: E501
+            "content": 'Generated using <a href="http://crinita.salispace.com/">Crinita</a>.'  # noqa: E501
         },
     )
 
